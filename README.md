@@ -15,6 +15,55 @@ It is plain CSS and JavaScript that you paste into the app's own developer conso
 
 > Unofficial. Not made by, affiliated with, or endorsed by Anthropic.
 
+## How to use it
+
+### 1. Get the files
+
+Click the green **Code** button at the top of this page, then **Download ZIP**. Unzip it and put the `claude-desktop-skin` folder somewhere it can stay, for example your home folder.
+
+### 2. Turn on Developer Mode in Claude (once)
+
+In the Claude app's menu bar, go to **Help → Troubleshooting → Enable Developer Mode**.
+
+### 3. Apply the skin
+
+1. In Claude, press **Cmd+Option+I** (Ctrl+Shift+I on Windows) to open the developer console, and click the **Console** tab.
+2. Open [`apply.js`](apply.js), copy everything in it, paste it into the console and press **Enter**. The first time, the console may ask you to type `allow pasting` before it accepts a paste.
+3. Close the console. The skin is on.
+
+The skin lasts until you quit Claude. After a restart you paste it again, or let your Mac do it for you (next step).
+
+### 4. Make it apply itself (Mac, optional but recommended)
+
+[`mac/apply-skin.sh`](mac/apply-skin.sh) does step 3 for you. It opens the console, pastes the skin, presses Enter, closes the console, and puts back whatever was on your clipboard. It only pastes when the front window really is the developer console, so the code can never land in a chat by accident. Hook it up to a keyboard shortcut with any of these.
+
+**BetterTouchTool** (what I use):
+
+1. Open BetterTouchTool's configuration and go to **Keyboard Shortcuts**.
+2. Add a new shortcut and record the keys you want, for example **Cmd+Shift+`**.
+3. Set its action to **Execute Shell Script / Task** and enter `bash ~/claude-desktop-skin/mac/apply-skin.sh` (change the path if you put the folder somewhere else).
+4. To apply it every time Claude opens, also add an **App Did Launch** trigger for Claude (under Automations / Other Triggers) with the action `bash ~/claude-desktop-skin/mac/apply-skin.sh --launch`.
+
+**The Shortcuts app** (built into macOS, free):
+
+1. Open **Shortcuts** and create a new shortcut.
+2. Add the **Run Shell Script** action and enter `bash ~/claude-desktop-skin/mac/apply-skin.sh`.
+3. Open the shortcut's details (the **i** button) and click **Add Keyboard Shortcut**.
+
+**Raycast, Keyboard Maestro or Hammerspoon** work too. Have them run the same command.
+
+The first time it runs, macOS asks you to give the app that runs it (BetterTouchTool, Shortcuts...) **Accessibility** permission, because the script presses keys for you. Allow it in System Settings → Privacy & Security → Accessibility. The script only acts when Claude is the app in front.
+
+### 5. Use it
+
+- **Click a project's line** to pick its colour, give it a tag, or make it the start of the right column.
+- **Click the arrow** on the left of a project's line to collapse or expand that project.
+- **Drag a project's line** to move the project.
+- **Drag the sidebar's right edge** to resize it. Double-click the edge to go back to the app's width.
+- **The A / A buttons** in the bottom bar change the sidebar's text size.
+
+Everything you choose is saved inside the app and survives restarts.
+
 ## Why I made this
 
 I use Claude all day. I have a lot of projects and a lot of sessions in each one, and the standard layout kept getting in my way. The sidebar showed only a handful of sessions at a time, big gaps sat around everything, and there was no way to tell my projects apart at a glance.
@@ -52,33 +101,9 @@ I wanted to use every bit of the screen and get more done. So I started tinkerin
 
 - **Block Control+Tab.** In Claude, Control+Tab switches sessions. If a trackpad gesture or another tool sends it by accident, set `"blockControlTab": true` in `skin-config.json` and rebuild. Cmd+Shift+[ and Cmd+Shift+] still switch sessions.
 
-All your choices (colours, tags, collapsed projects, the column split, text size, sidebar width) are saved inside the app, so they survive restarts. There are no files to edit.
-
-## Install
-
-You need the Claude desktop app with **Developer Mode** turned on. That's all.
-
-1. **Turn on Developer Mode.** In the Claude app's menu bar, go to **Help → Troubleshooting → Enable Developer Mode**.
-2. **Open the developer console.** Press **Cmd+Option+I** on Mac (Ctrl+Shift+I on Windows), then click the **Console** tab.
-3. **Copy everything in [`apply.js`](apply.js)** and paste it into the console. The first time, the console may ask you to type `allow pasting` before it accepts a paste. Then press Enter.
-4. Close the console. The skin is on.
-
-The skin lasts until you quit the app. After a restart, paste it again, or set it up to apply automatically (below).
-
-## Apply it automatically (Mac)
-
-[`mac/apply-skin.sh`](mac/apply-skin.sh) does the paste for you. It opens the console, pastes the skin, presses Enter, closes the console, and puts back whatever was on your clipboard. It only pastes when the front window really is the developer console, so the code can never land in a chat by accident.
-
-Run it from whatever you like to use for shortcuts:
-
-- **BetterTouchTool** (what I use): add a keyboard shortcut that runs the terminal command `/path/to/claude-desktop-skin/mac/apply-skin.sh`. Add an "App Did Launch" trigger for Claude that runs `/path/to/claude-desktop-skin/mac/apply-skin.sh --launch`, and the skin applies itself every time Claude opens.
-- **The Shortcuts app, Raycast, Keyboard Maestro or Hammerspoon** work too. Have them run the same script.
-
-Whichever app runs the script needs **Accessibility** permission (System Settings → Privacy & Security → Accessibility), because it presses keys for you.
-
 ## Windows
 
-The Windows app is built from the same code, so the skin should work the same way with steps 1 to 4 above. I've only tested it on a Mac, though. The automatic script is Mac only, so on Windows you paste it after each launch, or automate it with a tool like AutoHotkey.
+The Windows app is built from the same code, so the skin should work the same way with steps 1 to 3 above. I've only tested it on a Mac, though. The automatic script is Mac only, so on Windows you paste it after each launch, or automate it with a tool like AutoHotkey.
 
 ## Make it your own
 

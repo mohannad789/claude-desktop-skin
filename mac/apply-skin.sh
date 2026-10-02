@@ -20,7 +20,11 @@ else
   FRONT=$(osascript -e 'tell application "System Events" to get name of first process whose frontmost is true')
   [ "$FRONT" = "Claude" ] || { echo "$(date '+%F %T') skipped: front app is $FRONT" >> "$DIR/apply-skin.log"; exit 0; }
 fi
-python3 build.py >/dev/null 2>&1   # if python3 is missing, the ready-made apply.js is used
+# Rebuild apply.js only if you edited the skin and Python is available. On a Mac without the developer tools,
+# calling python3 pops up an install dialog, so the ready-made apply.js is used instead.
+if [ skin.css -nt apply.js ] || [ skin-ui.js -nt apply.js ] || [ skin-config.json -nt apply.js ]; then
+  if xcode-select -p >/dev/null 2>&1 || [ -x /opt/homebrew/bin/python3 ]; then python3 build.py >/dev/null 2>&1; fi
+fi
 
 OLD="$(mktemp)"; pbpaste > "$OLD"
 pbcopy < apply.js
