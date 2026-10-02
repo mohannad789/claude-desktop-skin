@@ -236,8 +236,6 @@ aside.dframe-sidebar .df-recents-anchor [class*="group/labelrow"]:has(.cskin-tag
 /* Message action bar (copy / branch / pin / read aloud / time): always visible instead of on hover, and smaller */
 .epitaxy-chat-panel [class*="group/msg"] div.select-none:has(> time) { opacity: 1 !important; scale: 1 !important; visibility: visible !important; pointer-events: auto !important; zoom: .8; }
 
-/* Unread that sticks (see tag.js): the skin's own unread mark draws the idle ring as Claude's blue unread dot */
-aside [data-row][data-cskin-unread] [role=img][aria-label="Idle"] > span { background: rgb(42, 120, 214); border-color: rgb(42, 120, 214); opacity: 1; }
 
 /* Tool lines in the chat ("Ran 4 commands", "Probed ..."): timestamp-sized text, less space above and below */
 .epitaxy-transcript-typography [class*="group/tool"] { zoom: .75; }

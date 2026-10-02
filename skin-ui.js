@@ -150,39 +150,6 @@ const addFontControl = () => {
 };
 
 
-// --- Unread that sticks. Claude clears a session's unread dot the moment it is opened (or never sets it if
-// the reply finished while you were in it). The skin keeps its own list (localStorage 'claudeSkinUnread', by session
-// name): a session joins it when Claude shows "Unread response", or when it goes Running -> Idle. It leaves
-// only when you scroll the open chat (real wheel/trackpad, 300px+) AND reaches the end, or sends a message there.
-const uLoad = () => { try { return new Set(JSON.parse(localStorage.getItem('claudeSkinUnread') || '[]')); } catch { return new Set(); } };
-const uSave = u => { try { localStorage.setItem('claudeSkinUnread', JSON.stringify([...u])); } catch {} };
-const rowName = r => r.querySelector('.dframe-fade-label')?.textContent.trim() || '';
-const curName = () => { const r = document.querySelector('aside [data-row][data-selected="focused"]'); return r ? rowName(r) : ''; };
-window.__cskinPrev = window.__cskinPrev || {};
-const syncUnread = () => {
-  const u = uLoad(); let changed = false;
-  for (const r of document.querySelectorAll('aside [data-row]')) {
-    const st = r.querySelector('[role=status][aria-label], [role=img][aria-label]'); const n = rowName(r); if (!st || !n) continue;
-    const s = st.getAttribute('aria-label'), prev = window.__cskinPrev[n]; window.__cskinPrev[n] = s;
-    if ((s === 'Unread response' || (prev === 'Running' && s === 'Idle')) && !u.has(n)) { u.add(n); changed = true; if (n === window.__cskinCur) window.__cskinWheel = 0; }
-    const show = u.has(n) && s === 'Idle';
-    if (show !== r.hasAttribute('data-cskin-unread')) r.toggleAttribute('data-cskin-unread', show);
-  }
-  if (changed) uSave(u);
-};
-const markRead = n => { const u = uLoad(); if (u.delete(n)) { uSave(u); syncUnread(); } };
-const checkRead = () => {
-  const n = curName(); if (n !== window.__cskinCur) { window.__cskinCur = n; window.__cskinWheel = 0; }
-  if (!n || !uLoad().has(n) || !document.hasFocus()) return;
-  const sc = document.querySelector('.epitaxy-chat-panel .epitaxy-transcript-typography')?.parentElement; if (!sc) return;
-  if (window.__cskinWheel >= 300 && sc.scrollHeight - sc.scrollTop - sc.clientHeight < 60) markRead(n);
-};
-if (window.__cskinWheelFn) document.removeEventListener('wheel', window.__cskinWheelFn, true);
-window.__cskinWheelFn = e => { if (!e.target.closest?.('.epitaxy-chat-panel') || e.target.closest('.ProseMirror')) return;
-  if (curName() !== window.__cskinCur) checkRead(); window.__cskinWheel = (window.__cskinWheel || 0) + Math.abs(e.deltaY); checkRead(); };
-document.addEventListener('wheel', window.__cskinWheelFn, { capture: true, passive: true });
-
-
 // --- "At the end" cue: mark each chat panel whose transcript is scrolled to the bottom (skin.css draws the cue)
 const updateEnd = () => {
   document.documentElement.dataset.cskinEndcue = load().endCue || 'glow';
@@ -202,7 +169,6 @@ const tagAll = () => {
   addFontControl();
   if (!document.getElementById('cskin-fs') && load().fontSize) applyFont();
   applySidebarWidth();
-  syncUnread();
   updateEnd();
   const st = load(), colors = st.colors || {}, splitAt = st.split || CFG.rightColumnStartsAt;
   for (const rec of document.querySelectorAll('[data-testid="sidebar-recents"]')) for (const block of rec.children) {
@@ -290,8 +256,7 @@ document.addEventListener('click', window.__cskinClick, true);
 // Optional (skin-config.json blockControlTab): Control+Tab / Control+Shift+Tab switch sessions in Claude. Block them if
 // another tool (e.g. a trackpad gesture) sends them by accident. Cmd+Shift+[ / ] still switch sessions.
 if (window.__cskinKey) window.removeEventListener('keydown', window.__cskinKey, true);
-window.__cskinKey = e => { if (CFG.blockControlTab && e.ctrlKey && !e.metaKey && e.key === 'Tab') { e.preventDefault(); e.stopImmediatePropagation(); }
-  else if (e.key === 'Enter' && !e.shiftKey && e.target.closest?.('.ProseMirror')) { const n = curName(); if (n) markRead(n); } };   // sending = read
+window.__cskinKey = e => { if (CFG.blockControlTab && e.ctrlKey && !e.metaKey && e.key === 'Tab') { e.preventDefault(); e.stopImmediatePropagation(); } };
 window.addEventListener('keydown', window.__cskinKey, true);
 for (const ev of ['pointerdown', 'mousedown']) document.addEventListener(ev, window.__cskinDown, true);
 if (window.__cskinObs) window.__cskinObs.disconnect();

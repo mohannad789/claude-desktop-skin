@@ -82,7 +82,6 @@ I wanted to use every bit of the screen and get more done. So I started tinkerin
 - **Project colours.** Click a project's line to pick one of 20 colours. The whole project gets a soft box in that colour.
 - **Tags.** Give each project one tag, such as "Client" or "Personal", in one of 5 colours. Rename or recolour a tag once and it changes on every project.
 - **Collapse projects.** The arrow on the left of a project's line collapses it. A collapsed project shows the name of its latest session in small text, and opens again while you hover over it.
-- **An unread dot that sticks.** Claude clears a session's blue unread dot the moment you open it, even by mistake. It never marks a reply unread at all if you were in that session when it finished. The skin keeps its own unread list instead. A session stays unread until you scroll through it to the end of the reply, or send a new message there.
 - **A clearer selected session**, with a darker background and an accent edge.
 - **Less clutter.** The New, Artifacts and Customize items, the Back and Forward buttons, and the "..." button that appears on hover are hidden. Search becomes a small magnifier button in the top bar. Right-click still has every action.
 - **Bold session names.** You can delete one block in `skin.css` if you prefer the normal weight.
@@ -108,7 +107,7 @@ The Windows app is built from the same code, so the skin should work the same wa
 ## Make it your own
 
 - **`skin.css`** holds all the looks: sizes, spacing, colours, what is hidden. Every block has a comment saying what it does.
-- **`skin-ui.js`** holds the parts you click: the colour menu, tags, collapse arrows, the text size buttons, the resize handle and the sticky unread dot.
+- **`skin-ui.js`** holds the parts you click: the colour menu, tags, collapse arrows, the text size buttons and the resize handle.
 - **`skin-config.json`** holds two settings: `rightColumnStartsAt` (a project name, or empty to split the columns evenly) and `blockControlTab`.
 
 After editing, run `python3 build.py` to rebuild `apply.js`, then paste it again. The Mac script rebuilds it for you each time it runs.
@@ -118,7 +117,7 @@ To find what to change, open the console's **Elements** tab and point at any par
 ## Remove it or start over
 
 - **Remove the skin:** quit and reopen Claude (and turn off any automatic apply).
-- **Reset all your choices:** paste `localStorage.removeItem('claudeSkin'); localStorage.removeItem('claudeSkinUnread')` into the console, then reapply.
+- **Reset all your choices:** paste `localStorage.removeItem('claudeSkin')` into the console, then reapply.
 
 ## Good to know
 
