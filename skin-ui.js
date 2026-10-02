@@ -164,12 +164,38 @@ if (window.__cskinScrollFn) document.removeEventListener('scroll', window.__cski
 window.__cskinScrollFn = () => { if (!endQueued) { endQueued = true; requestAnimationFrame(() => { endQueued = false; updateEnd(); }); } };
 document.addEventListener('scroll', window.__cskinScrollFn, { capture: true, passive: true });
 
+
+// --- Message button bars (copy, branch, pin, read aloud, time): Claude only builds a message's bar after the
+// mouse first passes over it, so skin.css's "always visible" had nothing to show. Each turn-ending message
+// (and each of your messages) without a bar gets a fake hover, so the bar is built straight away.
+const mountBars = () => {
+  let retry = false;
+  const rows = [...document.querySelectorAll('.epitaxy-chat-panel [data-testid="transcript-row"]')].filter(r => r.dataset.perfRow !== 'marker');
+  rows.forEach((r, k) => {
+    if (r.querySelector('div.select-none:has(> time)') || (+r.dataset.cskinHovN || 0) >= 5 || Date.now() - (+r.dataset.cskinHov || 0) < 500) return;   // has one, gave up, or tried just now
+    const user = !!r.querySelector('.epitaxy-user-turn'), next = rows[k + 1];
+    const endOfTurn = !user && /^assistant/.test(r.dataset.perfRow || '') && (!next || next.querySelector('.epitaxy-user-turn'));   // older rows are just "assistant"
+    if (!user && !endOfTurn) return;
+    if (endOfTurn && !next) {      // the last drawn row is only the end of a turn if nothing is drawn below it
+      const tail = r.closest('[data-testid="transcript-rows"]')?.lastElementChild;
+      if (!/height: 48px/.test(tail?.getAttribute('style') || '') || document.querySelector('.epitaxy-chat-panel [data-turn-working="true"]')) return;
+    }
+    const leaf = r.querySelector('.prose p, .prose li, .epitaxy-user-turn p, .epitaxy-user-turn [class*="whitespace-pre"]') || r.querySelector('[class*="group/msg"]');
+    if (!leaf) return;
+    r.dataset.cskinHov = Date.now(); r.dataset.cskinHovN = (+r.dataset.cskinHovN || 0) + 1; retry = true;
+    const o = { bubbles: true, cancelable: true, view: window, relatedTarget: null };       // out first, so it counts as a fresh hover
+    for (const t of ['pointerout', 'mouseout', 'pointerover', 'mouseover']) leaf.dispatchEvent(new (t[0] === 'p' ? PointerEvent : MouseEvent)(t, o));
+  });
+  if (retry) { clearTimeout(window.__cskinBarT); window.__cskinBarT = setTimeout(mountBars, 600); }   // a just-drawn message may ignore the first try
+};
+
 const tagAll = () => {
   addSearchButton();
   addFontControl();
   if (!document.getElementById('cskin-fs') && load().fontSize) applyFont();
   applySidebarWidth();
   updateEnd();
+  mountBars();
   const st = load(), colors = st.colors || {}, splitAt = st.split || CFG.rightColumnStartsAt;
   for (const rec of document.querySelectorAll('[data-testid="sidebar-recents"]')) for (const block of rec.children) {
     const lab = block.querySelector('button[class*="group/label"]'); if (!lab) continue;

@@ -244,7 +244,9 @@ aside.dframe-sidebar .df-recents-anchor [class*="group/labelrow"]:has(.cskin-tag
 /* Working status line under the last message ("37s · 189 tokens · Thinking..."): smaller, and the 48px of
    empty space the app keeps below the last message is cut to 18px */
 .epitaxy-transcript-typography [data-turn-working] > div.h-5 { zoom: .85; }
-[data-testid="transcript-rows"] > [data-testid="transcript-spacer"]:last-child { height: 18px !important; }
+/* Only the real end-of-chat space (48px): when scrolled up, this same spot holds the height of the messages
+   further down, which must not be touched */
+[data-testid="transcript-rows"] > [data-testid="transcript-spacer"]:last-child[style*="height: 48px"] { height: 18px !important; }
 
 /* "You're at the end" cue on the message box. Shows only while the chat is scrolled all the way down
    (tag.js sets data-cskin-end on the chat panel) and fades out as soon as you scroll up.

@@ -92,7 +92,7 @@ I wanted to use every bit of the screen and get more done. So I started tinkerin
 - **The message box grows to 8 lines at most,** then scrolls, so it never covers the conversation.
 - **The Terminal, Changes and Browser buttons** move from the top bar into the ⋮ menu, with their shortcuts shown.
 - **A shorter top bar**, and a smaller session title in it.
-- **The buttons under each message** (copy, branch, pin, read aloud and the time) always show instead of only on hover, and they are smaller.
+- **The buttons under each message** (copy, branch, pin, read aloud and the time) always show, and they are smaller. Claude normally only builds them the first time your mouse passes over a message, so the skin does that pass for you.
 - **Smaller tool lines** ("Ran 4 commands") and a smaller working status line, with less empty space around them.
 - **An "end of chat" cue.** When you're scrolled all the way down, the message box gets a soft orange glow. It fades as soon as you scroll up, so you always know whether there's more below. `skin.css` also has two other styles, a thin line along the top of the box and a small notch above it.
 
