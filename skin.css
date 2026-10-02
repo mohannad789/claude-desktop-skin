@@ -247,3 +247,17 @@ aside [data-row][data-cskin-unread] [role=img][aria-label="Idle"] > span { backg
    empty space the app keeps below the last message is cut to 12px */
 .epitaxy-transcript-typography [data-turn-working] > div.h-5 { zoom: .85; }
 [data-testid="transcript-rows"] > [data-testid="transcript-spacer"]:last-child { height: 12px !important; }
+
+/* "You're at the end" cue on the message box. Shows only while the chat is scrolled all the way down
+   (tag.js sets data-cskin-end on the chat panel) and fades out as soon as you scroll up.
+   Style picked with claudeSkin.endCue: glow (default: orange rim + soft glow), edge (orange line along the box's
+   top edge), notch (small orange pill above the box), none. */
+.epitaxy-prompt [class*="bg-surface-3"][class*="rounded-composer"]::after { content: ""; position: absolute; pointer-events: none;
+  opacity: 0; transition: opacity .25s ease; }
+.epitaxy-chat-panel[data-cskin-end] .epitaxy-prompt [class*="bg-surface-3"][class*="rounded-composer"]::after { opacity: 1; }
+html[data-cskin-endcue="edge"] .epitaxy-prompt [class*="bg-surface-3"][class*="rounded-composer"]::after {
+  inset: 0; border-radius: inherit; box-shadow: inset 0 2px 0 hsl(var(--accent-brand)); }
+html[data-cskin-endcue="notch"] .epitaxy-prompt [class*="bg-surface-3"][class*="rounded-composer"]::after {
+  top: -7px; left: 50%; width: 36px; height: 3px; transform: translateX(-50%); border-radius: 3px; background: hsl(var(--accent-brand)); }
+html[data-cskin-endcue="glow"] .epitaxy-prompt [class*="bg-surface-3"][class*="rounded-composer"]::after {
+  inset: 0; border-radius: inherit; box-shadow: inset 0 0 0 1px hsl(var(--accent-brand) / 0.45), 0 -5px 16px -8px hsl(var(--accent-brand) / 0.4); }

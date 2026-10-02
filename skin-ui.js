@@ -182,12 +182,28 @@ window.__cskinWheelFn = e => { if (!e.target.closest?.('.epitaxy-chat-panel') ||
   if (curName() !== window.__cskinCur) checkRead(); window.__cskinWheel = (window.__cskinWheel || 0) + Math.abs(e.deltaY); checkRead(); };
 document.addEventListener('wheel', window.__cskinWheelFn, { capture: true, passive: true });
 
+
+// --- "At the end" cue: mark each chat panel whose transcript is scrolled to the bottom (skin.css draws the cue)
+const updateEnd = () => {
+  document.documentElement.dataset.cskinEndcue = load().endCue || 'glow';
+  for (const panel of document.querySelectorAll('.epitaxy-chat-panel')) {
+    const sc = panel.querySelector('.epitaxy-transcript-typography')?.parentElement; if (!sc) continue;
+    const end = sc.scrollHeight - sc.scrollTop - sc.clientHeight < 6;
+    if (end !== panel.hasAttribute('data-cskin-end')) panel.toggleAttribute('data-cskin-end', end);
+  }
+};
+let endQueued = false;
+if (window.__cskinScrollFn) document.removeEventListener('scroll', window.__cskinScrollFn, true);
+window.__cskinScrollFn = () => { if (!endQueued) { endQueued = true; requestAnimationFrame(() => { endQueued = false; updateEnd(); }); } };
+document.addEventListener('scroll', window.__cskinScrollFn, { capture: true, passive: true });
+
 const tagAll = () => {
   addSearchButton();
   addFontControl();
   if (!document.getElementById('cskin-fs') && load().fontSize) applyFont();
   applySidebarWidth();
   syncUnread();
+  updateEnd();
   const st = load(), colors = st.colors || {}, splitAt = st.split || CFG.rightColumnStartsAt;
   for (const rec of document.querySelectorAll('[data-testid="sidebar-recents"]')) for (const block of rec.children) {
     const lab = block.querySelector('button[class*="group/label"]'); if (!lab) continue;
