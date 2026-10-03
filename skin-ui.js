@@ -181,6 +181,51 @@ const mountBars = () => {
   if (retry) { clearTimeout(window.__cskinBarT); window.__cskinBarT = setTimeout(mountBars, 600); }   // a just-drawn message may ignore the first try
 };
 
+
+// --- Mod side panes (a mod's pane, like a to-do list): the app seats each as a tile beside the chat, at least
+// 280px wide, and the only way to get the room back is to close it. The skin lets it go down to 160px and adds
+// show/hide without closing: a button in the chat's top bar (only while a pane exists) and Option+Cmd+B,
+// the mirror of Claude's own Cmd+B for the left sidebar. Hidden or not, the mod keeps running.
+const PANE_SVG = '<svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="2" y="2.5" width="12" height="11" rx="2"/><path d="M10 2.5v11"/></svg>';
+const panesHidden = () => !!load().panesHidden;
+const setPanesHidden = v => { const s = load(); s.panesHidden = v; save(s); addPaneToggle(); };
+const addPaneToggle = () => {
+  document.documentElement.toggleAttribute('data-cskin-panes-hidden', panesHidden());
+  const tb = document.querySelector('.epitaxy-chat-panel .epitaxy-titlebar'); if (!tb) return;
+  let b = tb.querySelector('.cskin-pane-toggle');
+  if (!document.querySelector('[data-tile-host="plugin"]')) { b?.remove(); return; }
+  if (!b) {
+    b = document.createElement('button'); b.className = 'cskin-pane-toggle'; b.innerHTML = PANE_SVG;
+    b.addEventListener('click', e => { e.stopPropagation(); setPanesHidden(!panesHidden()); });
+    const vo = tb.querySelector('button[aria-label="View options"]'); vo ? vo.before(b) : tb.append(b);
+  }
+  b.classList.toggle('on', !panesHidden()); b.title = (panesHidden() ? 'Show' : 'Hide') + ' the side pane (Option+Cmd+B)';
+};
+if (window.__cskinPaneKey) window.removeEventListener('keydown', window.__cskinPaneKey, true);
+window.__cskinPaneKey = e => { if (e.metaKey && e.altKey && !e.shiftKey && !e.ctrlKey && e.code === 'KeyB' && document.querySelector('[data-tile-host="plugin"]')) { e.preventDefault(); e.stopImmediatePropagation(); setPanesHidden(!panesHidden()); } };
+window.addEventListener('keydown', window.__cskinPaneKey, true);
+
+
+// --- Pane width: the app's own drag between the chat and a mod pane stops at 280px. The skin takes over that
+// one divider: drag to any width from 160 to 800px (remembered); double-click it to go back to the app's sizing.
+const paneWrap = () => document.querySelector('[data-tile-host="plugin"]')?.parentElement?.parentElement;
+const applyPaneWidth = () => { const w = load().paneW, h = document.documentElement;
+  if (w) { if (h.style.getPropertyValue('--cskin-pane-w') !== w + 'px') h.style.setProperty('--cskin-pane-w', w + 'px'); if (!h.hasAttribute('data-cskin-pane-w')) h.setAttribute('data-cskin-pane-w', ''); }
+  else { h.style.removeProperty('--cskin-pane-w'); h.removeAttribute('data-cskin-pane-w'); } };
+const paneDivider = t => { const d = t?.closest?.('[data-tile-divider]'); return d && d.nextElementSibling === paneWrap() ? d : null; };
+if (window.__cskinPaneDrag) { window.removeEventListener('pointerdown', window.__cskinPaneDrag, true); window.removeEventListener('dblclick', window.__cskinPaneReset, true); }
+window.__cskinPaneDrag = e => {
+  if (e.button !== 0 || !paneDivider(e.target)) return;
+  e.preventDefault(); e.stopImmediatePropagation();
+  const right = paneWrap().getBoundingClientRect().right; let cur = null; document.body.classList.add('cskin-resizing');
+  const move = ev => { cur = Math.round(Math.min(800, Math.max(160, right - ev.clientX))); const s = load(); s.paneW = cur; save(s); applyPaneWidth(); };
+  const up = () => { window.removeEventListener('pointermove', move, true); window.removeEventListener('pointerup', up, true); document.body.classList.remove('cskin-resizing'); };
+  window.addEventListener('pointermove', move, true); window.addEventListener('pointerup', up, true);
+};
+window.__cskinPaneReset = e => { if (!paneDivider(e.target)) return; e.preventDefault(); e.stopImmediatePropagation(); const s = load(); delete s.paneW; save(s); applyPaneWidth(); };
+window.addEventListener('pointerdown', window.__cskinPaneDrag, true);
+window.addEventListener('dblclick', window.__cskinPaneReset, true);
+
 const tagAll = () => {
   addSearchButton();
   addFontControl();
@@ -188,6 +233,8 @@ const tagAll = () => {
   applySidebarWidth();
   updateEnd();
   mountBars();
+  addPaneToggle();
+  applyPaneWidth();
   const st = load(), colors = st.colors || {}, splitAt = st.split || CFG.rightColumnStartsAt;
   for (const rec of document.querySelectorAll('[data-testid="sidebar-recents"]')) for (const block of rec.children) {
     const lab = block.querySelector('button[class*="group/label"]'); if (!lab) continue;
@@ -291,7 +338,7 @@ window.__cskinKey = e => { if (CFG.blockControlTab && e.ctrlKey && !e.metaKey &&
 window.addEventListener('keydown', window.__cskinKey, true);
 for (const ev of ['pointerdown', 'mousedown']) document.addEventListener(ev, window.__cskinDown, true);
 if (window.__cskinObs) window.__cskinObs.disconnect();
-document.querySelectorAll('.cskin-swatch, .cskin-chev, .cskin-search, .cskin-resize, .cskin-fs, .cskin-tags').forEach(e => e.remove());
+document.querySelectorAll('.cskin-swatch, .cskin-chev, .cskin-search, .cskin-resize, .cskin-fs, .cskin-tags, .cskin-pane-toggle').forEach(e => e.remove());
 document.querySelectorAll('[data-cskin-click]').forEach(e => delete e.dataset.cskinClick);   // remove old dots so new ones get the current palette code
 let queued = false;
 window.__cskinObs = new MutationObserver(() => { extendViewMenu(); if (!queued) { queued = true; requestAnimationFrame(() => { queued = false; tagAll(); }); } });

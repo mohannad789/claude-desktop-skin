@@ -111,13 +111,22 @@ I wanted to use every bit of the screen and get more done. So I started tinkerin
 ### Chat
 
 - **A wider chat.** The empty space on each side of the messages and the message box is cut in half.
+- **Replies use the full width.** Claude normally stops every reply up to 56px short of the right edge. The skin removes that margin, so replies line up with the message box.
 - **The message box grows to 8 lines at most,** then scrolls, so it never covers the conversation.
 - **The Terminal, Changes and Browser buttons** move from the top bar into the ⋮ menu, with their shortcuts shown.
 - **A shorter top bar**, and a smaller session title in it.
 - **The buttons under each message** (copy, branch, pin, read aloud and the time) always show, and they are smaller. Claude normally only builds them the first time your mouse passes over a message, so the skin does that pass for you.
 - **Smaller tool lines** ("Ran 4 commands") and a smaller working status line, with less empty space around them.
 - **Escape no longer stops a reply by accident.** In Claude, pressing Escape while a reply is running stops it, even when you only meant to close Cmd+F search. The skin ignores a single Escape while a reply runs. Menus and dialogs still close with Escape, and pressing Escape twice quickly still stops the reply when you mean it.
-- **An "end of chat" cue.** When you're scrolled all the way down, the message box gets a soft orange glow. It fades as soon as you scroll up, so you always know whether there's more below. `skin.css` also has two other styles, a thin line along the top of the box and a small notch above it.
+- **A "more below" cue.** While you're scrolled up, the message box has a soft orange glow, so you can tell at a glance that the chat continues below. It goes away once you reach the end. `skin.css` also has two other styles, a thin line along the top of the box and a small notch above it.
+
+### Mod panes
+
+If you use [Claude Code mods](https://code.claude.com/docs/en/plugins/mods/overview) (plugins that add a side pane or a row of buttons above the message box), the skin makes them fit better:
+
+- **Show or hide a mod's side pane without closing it.** Use the button in the chat's top bar, next to ⋮, or press **Option+Cmd+B**, the mirror of Claude's own Cmd+B for the left sidebar. When hidden, the chat gets its full width back and the mod keeps running.
+- **Drag the pane narrower.** Claude stops it at 280px; the skin lets it go down to 160px, and remembers the width. Double-click the edge to reset it.
+- **Compact mod boxes.** Smaller text, buttons and padding in mod panes, and a slimmer button row above the message box.
 
 ### Optional
 

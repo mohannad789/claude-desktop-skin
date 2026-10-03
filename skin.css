@@ -246,16 +246,42 @@ aside.dframe-sidebar .df-recents-anchor [class*="group/labelrow"]:has(.cskin-tag
 /* The space after the last message (the app keeps 48px visible above the message box): 30px less, so 18px */
 [data-testid="transcript-sizer"] > [data-testid="transcript-spacer"]:last-child { margin-top: -30px; }
 
-/* "You're at the end" cue on the message box. Shows only while the chat is scrolled all the way down
-   (tag.js sets data-cskin-end on the chat panel) and fades out as soon as you scroll up.
+/* "There's more below" cue on the message box. Shows while the chat is NOT scrolled all the way down
+   (tag.js sets data-cskin-end on the chat panel when it is) and fades out once you reach the end.
    Style picked with claudeSkin.endCue: glow (default: orange rim + soft glow), edge (orange line along the box's
    top edge), notch (small orange pill above the box), none. */
 .epitaxy-prompt [class*="bg-surface-3"][class*="rounded-composer"]::after { content: ""; position: absolute; pointer-events: none;
   opacity: 0; transition: opacity .25s ease; }
-.epitaxy-chat-panel[data-cskin-end] .epitaxy-prompt [class*="bg-surface-3"][class*="rounded-composer"]::after { opacity: 1; }
+.epitaxy-chat-panel:not([data-cskin-end]) .epitaxy-prompt [class*="bg-surface-3"][class*="rounded-composer"]::after { opacity: 1; }
 html[data-cskin-endcue="edge"] .epitaxy-prompt [class*="bg-surface-3"][class*="rounded-composer"]::after {
   inset: 0; border-radius: inherit; box-shadow: inset 0 2px 0 hsl(var(--accent-brand)); }
 html[data-cskin-endcue="notch"] .epitaxy-prompt [class*="bg-surface-3"][class*="rounded-composer"]::after {
   top: -7px; left: 50%; width: 36px; height: 3px; transform: translateX(-50%); border-radius: 3px; background: hsl(var(--accent-brand)); }
 html[data-cskin-endcue="glow"] .epitaxy-prompt [class*="bg-surface-3"][class*="rounded-composer"]::after {
   inset: 0; border-radius: inherit; box-shadow: inset 0 0 0 1.5px hsl(var(--accent-brand) / 0.75), 0 -6px 22px -8px hsl(var(--accent-brand) / 0.65); }
+
+/* Mod side panes (see tag.js): can be dragged down to 160px (the app stops at 280px), and hide on demand */
+div:has(> .tiles-shell > [data-tile-host="plugin"]) { min-width: 160px !important; }
+html[data-cskin-panes-hidden] div:has(> .tiles-shell > [data-tile-host="plugin"]) { display: none !important; }
+.epitaxy-titlebar .cskin-pane-toggle { display: flex; align-items: center; justify-content: center; width: 26px; height: 26px; border: 0; border-radius: 7px;
+  background: none; color: hsl(var(--text-400)); cursor: pointer; -webkit-app-region: no-drag; }
+.epitaxy-titlebar .cskin-pane-toggle:hover { background: hsl(var(--text-500) / 0.12); color: hsl(var(--text-100)); }
+.epitaxy-titlebar .cskin-pane-toggle.on { color: hsl(var(--text-100)); }
+
+/* Mod boxes are drawn in a sealed layer (shadow DOM), but they size themselves from shared settings
+   (--cds-font-size-body, --cds-h-control...), which the skin sets on them from outside.
+   The row above the message box: smaller text and buttons, a thinner strip */
+[data-band-enter] > div:has([class*="contain:none"]) { min-height: 0 !important; padding: 3px 6px !important; border-radius: 8px !important; }
+[data-band-enter] [class*="contain:none"] { font-size: 11px; --cds-font-size-body: 11px; --cds-leading-body: 1.35; --cds-h-control: 19px;
+  --cds-pad-md: 6px; --cds-pad-xs: 3px; --cds-radius: 6px;
+  --cds-font-size-body--sm: 10.5px; --cds-h-control--sm: 19px; --cds-radius--sm: 6px; }
+/* The side pane: smaller text, buttons and spacing, and a smaller title */
+[data-tile-host="plugin"] [class*="contain:none"] { font-size: 11.5px; --cds-font-size-body: 11.5px; --cds-leading-body: 1.35; --cds-h-control: 21px;
+  --cds-pad-md: 7px; --cds-pad-lg: 8px; --cds-pad-xs: 3px; --cds-radius: 6px;
+  --cds-font-size-body--sm: 11px; --cds-h-control--sm: 21px; --cds-radius--sm: 6px; }
+[data-tile-host="plugin"] [data-pane-root] [data-top-right] span { font-size: 11.5px !important; }
+/* Pane width chosen with the skin's own drag (tag.js): the app's drag stops at 280px */
+html[data-cskin-pane-w] div:has(> .tiles-shell > [data-tile-host="plugin"]) { flex: 0 0 var(--cskin-pane-w) !important; }
+
+/* Replies use the full width: Claude keeps up to 56px empty on the right of every reply (a "reading stop") */
+.epitaxy-chat-panel [data-cds="AssistantMessage"] { --cds-assistant-message-text-stop: 0px !important; }
