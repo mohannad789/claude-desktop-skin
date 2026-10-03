@@ -263,7 +263,20 @@ const extendViewMenu = () => {
     list.prepend(frag);
   }
 };
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closePalette(); });
+// --- Escape. Claude stops a running reply on Escape, which also fires when you press Escape to close Cmd+F
+// search. Claude's stop-on-Escape ignores an Escape that is already marked as handled (defaultPrevented), so
+// while a reply is running the skin marks a single Escape as handled. Menus, dialogs and pop-ups still close
+// with it, and pressing Escape twice quickly still stops the reply on purpose. It also closes the colour menu.
+if (window.__cskinEscFn) window.removeEventListener('keydown', window.__cskinEscFn, true);
+window.__cskinEscFn = e => {
+  if (e.key !== 'Escape') return;
+  if (document.getElementById('cskin-palette')) { closePalette(); e.preventDefault(); return; }
+  if (!document.querySelector('.epitaxy-chat-panel [data-turn-working="true"]')) return;                 // nothing running
+  if (document.querySelector('[role=menu], [role=dialog], [role=alertdialog], [role=listbox]')) return;    // let Escape close it
+  if (Date.now() - (window.__cskinEscAt || 0) < 600) { window.__cskinEscAt = 0; return; }                  // second press: stop on purpose
+  window.__cskinEscAt = Date.now(); e.preventDefault();
+};
+window.addEventListener('keydown', window.__cskinEscFn, true);
 
 // One delegated click handler for the project bands (replaced cleanly on every re-apply):
 // chevron = collapse/expand, anywhere else on the band = colour menu. Dragging the band still works.

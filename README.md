@@ -94,6 +94,7 @@ I wanted to use every bit of the screen and get more done. So I started tinkerin
 - **A shorter top bar**, and a smaller session title in it.
 - **The buttons under each message** (copy, branch, pin, read aloud and the time) always show, and they are smaller. Claude normally only builds them the first time your mouse passes over a message, so the skin does that pass for you.
 - **Smaller tool lines** ("Ran 4 commands") and a smaller working status line, with less empty space around them.
+- **Escape no longer stops a reply by accident.** In Claude, pressing Escape while a reply is running stops it, even when you only meant to close Cmd+F search. The skin ignores a single Escape while a reply runs. Menus and dialogs still close with Escape, and pressing Escape twice quickly still stops the reply when you mean it.
 - **An "end of chat" cue.** When you're scrolled all the way down, the message box gets a soft orange glow. It fades as soon as you scroll up, so you always know whether there's more below. `skin.css` also has two other styles, a thin line along the top of the box and a small notch above it.
 
 ### Optional
