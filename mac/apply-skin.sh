@@ -26,43 +26,15 @@ if [ skin.css -nt apply.js ] || [ skin-ui.js -nt apply.js ] || [ skin-config.jso
   if xcode-select -p >/dev/null 2>&1 || [ -x /opt/homebrew/bin/python3 ]; then python3 build.py >/dev/null 2>&1; fi
 fi
 
-OLD="$(mktemp)"; pbpaste > "$OLD"
-pbcopy < apply.js
-
-RESULT=$(osascript <<'OSA'
-tell application "Claude" to activate
-delay 0.3
-tell application "System Events"
-  tell process "Claude"
-    set devWins to (every window whose name starts with "Developer Tools")
-    if (count of devWins) > 0 then
-      set w to item 1 of devWins
-      set frontmost to true
-      perform action "AXRaise" of w
-      set value of attribute "AXMain" of w to true
-      set opened to false
-    else
-      keystroke "i" using {command down, option down}
-      set opened to true
-    end if
-    repeat 15 times
-      if name of front window starts with "Developer Tools" then exit repeat
-      delay 0.3
-    end repeat
-    delay 0.3
-    set winName to name of front window
-    if winName does not start with "Developer Tools" then return "aborted: front window is " & winName
-    keystroke "v" using {command down}
-    delay 0.5
-    key code 36
-    delay 0.6
-    if opened then click button 1 of (first window whose name starts with "Developer Tools")
-  end tell
-end tell
-return "applied"
-OSA
-)
-sleep 0.3
-[ -s "$OLD" ] && pbcopy < "$OLD"
-rm -f "$OLD"
+# Paste it through run-js.sh and check it really ran: the snippet copies a marker to the clipboard when it
+# finishes. A paste can fail silently (e.g. stray text left in the console's input box), so try up to 3 times.
+TMP="$DIR/.apply-run.js"; { cat apply.js; printf '\n;copy("CLAUDE_SKIN_APPLIED")\n'; } > "$TMP"
+RESULT="failed after 3 tries"
+for i in 1 2 3; do
+  "$DIR/mac/run-js.sh" "$TMP" >/dev/null 2>&1
+  if grep -q "CLAUDE_SKIN_APPLIED" "$DIR/.apply-run.out" 2>/dev/null; then RESULT="applied (try $i)"; break; fi
+  sleep 1
+done
+rm -f "$TMP" "$DIR/.apply-run.out"
 echo "$(date '+%F %T') $RESULT" >> "$DIR/apply-skin.log"
+echo "$RESULT"

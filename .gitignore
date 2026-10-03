@@ -1,1 +1,6 @@
 .DS_Store
+.apply-run.js
+.apply-run.out
+*.out
+probe*.js
+apply-skin.log

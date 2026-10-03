@@ -2,7 +2,7 @@
 
 A custom layout for the **Claude desktop app** (the Code tab): a two-column sidebar, project colours and tags, a wider chat, and less wasted space everywhere.
 
-It is plain CSS and JavaScript that you paste into the app's own developer console. Nothing in the app is modified on disk, and a restart brings back the original look.
+It is plain CSS and JavaScript that runs in the app's own developer console. Nothing in the app is modified on disk, and a restart brings back the original look. You can set it up by hand, or paste one prompt into Claude and let it walk you through.
 
 ![Before and after: the same sidebar shows 14 sessions as Claude ships it, and 33 with the skin](screenshots/before-after.png)
 
@@ -17,7 +17,27 @@ It is plain CSS and JavaScript that you paste into the app's own developer conso
 
 > Unofficial. Not made by, affiliated with, or endorsed by Anthropic.
 
-## How to use it
+## The easy way: let Claude set it up for you
+
+You don't need to understand any code. Open a new session in the Claude desktop app's **Code** tab, paste the prompt below, and Claude walks you through everything one step at a time: what the skin changes, turning on Developer Mode, applying it, and making it apply itself every time Claude opens.
+
+```text
+I want to customise the layout of my Claude desktop app with Claude Desktop Skin:
+https://github.com/mohannad789/claude-desktop-skin
+
+Please download it into a folder called claude-desktop-skin in my home folder (git clone, or the ZIP if git
+isn't available), then read its CLAUDE.md and follow it. Walk me through the setup one step at a time, in plain
+language, and wait for me whenever a step needs me to click something. Before applying anything, tell me in a
+few lines what it will change, and check that the code makes no network requests.
+```
+
+After that, the same session is your helper:
+
+- **Change anything you like:** "make the sidebar text bigger", "use a different colour for the glow", "turn off the bold session names". It edits the skin and re-applies it.
+- **Fix it after a Claude update:** if something looks wrong after Claude updates itself, tell the session what you see. `CLAUDE.md` explains how to find what changed and fix it.
+- **Don't want my layout?** Ask it to start from a clean skin and build your own. My version is just the one I spent many hours tuning for a lot of projects and sessions.
+
+## Set it up by hand
 
 ### 1. Get the files
 
