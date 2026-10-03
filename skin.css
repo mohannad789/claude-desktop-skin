@@ -234,19 +234,17 @@ aside.dframe-sidebar .df-recents-anchor [class*="group/labelrow"]:has(.cskin-tag
 .epitaxy-titlebar button.truncate[class*="text-body-medium"] { font-size: 11.5px !important; }
 
 /* Message action bar (copy / branch / pin / read aloud / time): always visible instead of on hover, and smaller */
-.epitaxy-chat-panel [class*="group/msg"] div.select-none:has(> time) { opacity: 1 !important; scale: 1 !important; visibility: visible !important; pointer-events: auto !important; zoom: .8; }
+.epitaxy-chat-panel [data-cds="MessageActions"]:not([data-deferred]) { opacity: 1 !important; scale: 1 !important; visibility: visible !important; pointer-events: auto !important; zoom: .8; }
 
 
 /* Tool lines in the chat ("Ran 4 commands", "Probed ..."): timestamp-sized text, less space above and below */
-.epitaxy-transcript-typography [class*="group/tool"] { zoom: .75; }
-.epitaxy-transcript-typography div.flex-col.w-full:has(> [class*="group/tool"]) { margin-block: -4px; }
+.epitaxy-transcript-typography [data-cds="TurnStatus"]:not([data-testid="code-working-line"] *) { zoom: .75; margin-block: -3px; }
 
 /* Working status line under the last message ("37s · 189 tokens · Thinking..."): smaller, and the 48px of
-   empty space the app keeps below the last message is cut to 18px */
-.epitaxy-transcript-typography [data-turn-working] > div.h-5 { zoom: .85; }
-/* Only the real end-of-chat space (48px): when scrolled up, this same spot holds the height of the messages
-   further down, which must not be touched */
-[data-testid="transcript-rows"] > [data-testid="transcript-spacer"]:last-child[style*="height: 48px"] { height: 18px !important; }
+   empty space below the last message is cut to 18px (see below) */
+.epitaxy-transcript-typography [data-testid="code-working-line"] [data-cds="TurnStatus"] { zoom: .85; }
+/* The space after the last message (the app keeps 48px visible above the message box): 30px less, so 18px */
+[data-testid="transcript-sizer"] > [data-testid="transcript-spacer"]:last-child { margin-top: -30px; }
 
 /* "You're at the end" cue on the message box. Shows only while the chat is scrolled all the way down
    (tag.js sets data-cskin-end on the chat panel) and fades out as soon as you scroll up.

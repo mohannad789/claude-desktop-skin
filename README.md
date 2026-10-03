@@ -4,6 +4,8 @@ A custom layout for the **Claude desktop app** (the Code tab): a two-column side
 
 It is plain CSS and JavaScript that you paste into the app's own developer console. Nothing in the app is modified on disk, and a restart brings back the original look.
 
+![Before and after: the same sidebar shows 14 sessions as Claude ships it, and 33 with the skin](screenshots/before-after.png)
+
 ![Claude desktop app with the skin applied](screenshots/overview.png)
 
 <p>

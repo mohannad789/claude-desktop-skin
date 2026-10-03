@@ -154,7 +154,7 @@ const addFontControl = () => {
 const updateEnd = () => {
   document.documentElement.dataset.cskinEndcue = load().endCue || 'glow';
   for (const panel of document.querySelectorAll('.epitaxy-chat-panel')) {
-    const sc = panel.querySelector('.epitaxy-transcript-typography')?.parentElement; if (!sc) continue;
+    const sc = panel.querySelector('[data-autoscroll-container="true"]') || panel.querySelector('.epitaxy-transcript-typography')?.parentElement; if (!sc) continue;
     const end = sc.scrollHeight - sc.scrollTop - sc.clientHeight < 6;
     if (end !== panel.hasAttribute('data-cskin-end')) panel.toggleAttribute('data-cskin-end', end);
   }
@@ -165,27 +165,19 @@ window.__cskinScrollFn = () => { if (!endQueued) { endQueued = true; requestAnim
 document.addEventListener('scroll', window.__cskinScrollFn, { capture: true, passive: true });
 
 
-// --- Message button bars (copy, branch, pin, read aloud, time): Claude only builds a message's bar after the
-// mouse first passes over it, so skin.css's "always visible" had nothing to show. Each turn-ending message
-// (and each of your messages) without a bar gets a fake hover, so the bar is built straight away.
+// --- Message button bars (copy, branch, pin, read aloud, time): Claude draws each one as an empty placeholder
+// ([data-cds=MessageActions][data-deferred]) and only fills it in once the mouse passes over the message, so
+// skin.css's "always visible" had nothing to show. Each placeholder gets a fake hover, so it fills in straight away.
 const mountBars = () => {
   let retry = false;
-  const rows = [...document.querySelectorAll('.epitaxy-chat-panel [data-testid="transcript-row"]')].filter(r => r.dataset.perfRow !== 'marker');
-  rows.forEach((r, k) => {
-    if (r.querySelector('div.select-none:has(> time)') || (+r.dataset.cskinHovN || 0) >= 5 || Date.now() - (+r.dataset.cskinHov || 0) < 500) return;   // has one, gave up, or tried just now
-    const user = !!r.querySelector('.epitaxy-user-turn'), next = rows[k + 1];
-    const endOfTurn = !user && /^assistant/.test(r.dataset.perfRow || '') && (!next || next.querySelector('.epitaxy-user-turn'));   // older rows are just "assistant"
-    if (!user && !endOfTurn) return;
-    if (endOfTurn && !next) {      // the last drawn row is only the end of a turn if nothing is drawn below it
-      const tail = r.closest('[data-testid="transcript-rows"]')?.lastElementChild;
-      if (!/height: 48px/.test(tail?.getAttribute('style') || '') || document.querySelector('.epitaxy-chat-panel [data-turn-working="true"]')) return;
-    }
-    const leaf = r.querySelector('.prose p, .prose li, .epitaxy-user-turn p, .epitaxy-user-turn [class*="whitespace-pre"]') || r.querySelector('[class*="group/msg"]');
-    if (!leaf) return;
-    r.dataset.cskinHov = Date.now(); r.dataset.cskinHovN = (+r.dataset.cskinHovN || 0) + 1; retry = true;
+  for (const bar of document.querySelectorAll('.epitaxy-chat-panel [data-cds="MessageActions"][data-deferred]')) {
+    const row = bar.closest('[data-testid="transcript-row"]') || bar.parentElement;
+    if ((+row.dataset.cskinHovN || 0) >= 5 || Date.now() - (+row.dataset.cskinHov || 0) < 500) continue;   // gave up, or tried just now
+    const leaf = row.querySelector('p, li') || row;
+    row.dataset.cskinHov = Date.now(); row.dataset.cskinHovN = (+row.dataset.cskinHovN || 0) + 1; retry = true;
     const o = { bubbles: true, cancelable: true, view: window, relatedTarget: null };       // out first, so it counts as a fresh hover
     for (const t of ['pointerout', 'mouseout', 'pointerover', 'mouseover']) leaf.dispatchEvent(new (t[0] === 'p' ? PointerEvent : MouseEvent)(t, o));
-  });
+  }
   if (retry) { clearTimeout(window.__cskinBarT); window.__cskinBarT = setTimeout(mountBars, 600); }   // a just-drawn message may ignore the first try
 };
 
