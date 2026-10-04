@@ -15,11 +15,12 @@ Assume they are not a developer. Speak plainly, one step at a time. When a step 
 3. **Developer Mode.** They turn it on themselves: in the Claude menu bar, **Help → Troubleshooting → Enable Developer Mode**.
 4. **Apply it the first time, by hand.** This is the simplest and most transparent way.
    - Put the skin on their clipboard. Mac: `pbcopy < apply.js`. Windows (PowerShell): `Get-Content apply.js -Raw | Set-Clipboard`.
-   - Tell them to press **Cmd+Option+I** (Ctrl+Shift+I on Windows), click the **Console** tab, paste, and press **Enter**. The first time, the console may ask them to type `allow pasting` first. Then they close the console.
+   - Tell them to press **Cmd+Option+I** (Ctrl+Alt+I on Windows; Ctrl+Shift+I opens the model picker there), click the **Console** tab, paste, and press **Enter**. The first time, the console may ask them to type `allow pasting` first. Then they close the console.
    - Ask them what they see. The sidebar should switch to two columns.
 5. **Make it stick (Mac, optional).** The skin lasts until Claude quits. Offer two ways to re-apply it:
    - **Ask you.** You run `bash mac/apply-skin.sh` from this folder. It opens the console, pastes the skin, checks that it really ran, and closes the console. The first time, macOS asks them to give Claude **Accessibility** permission (System Settings → Privacy & Security → Accessibility). They grant it themselves; you never change system settings.
    - **A keyboard shortcut, and/or apply on launch.** Follow the BetterTouchTool or Shortcuts steps in README.md, and walk them through it click by click.
+   - **On Windows,** `windows/claude-skin.ahk` (AutoHotkey v2) applies it on every launch and on Ctrl+Alt+S. Follow the "Windows" section of README.md. They apply it by hand once first, so the console has accepted `allow pasting`. Each run is logged to `windows/apply-skin.log`; `applied` there with no visible change means the paste didn't take.
 6. **Show them how to use it.** Click a project's line for colour, tag and column; the arrow collapses it; drag the line to reorder; drag the sidebar edge to resize; the A / A buttons change the text size.
 
 ## Customising it

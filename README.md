@@ -49,7 +49,7 @@ In the Claude app's menu bar, go to **Help → Troubleshooting → Enable Develo
 
 ### 3. Apply the skin
 
-1. In Claude, press **Cmd+Option+I** (Ctrl+Shift+I on Windows) to open the developer console, and click the **Console** tab.
+1. In Claude, press **Cmd+Option+I** (**Ctrl+Alt+I** on Windows) to open the developer console, and click the **Console** tab.
 2. Open [`apply.js`](apply.js), copy everything in it, paste it into the console and press **Enter**. The first time, the console may ask you to type `allow pasting` before it accepts a paste.
 3. Close the console. The skin is on.
 
@@ -134,7 +134,28 @@ If you use [Claude Code mods](https://code.claude.com/docs/en/plugins/mods/overv
 
 ## Windows
 
-The Windows app is built from the same code, so the skin should work the same way with steps 1 to 3 above. I've only tested it on a Mac, though. The automatic script is Mac only, so on Windows you paste it after each launch, or automate it with a tool like AutoHotkey.
+The skin works on Windows with steps 1 to 3 above. Two things are different:
+
+- **The developer console opens with Ctrl+Alt+I.** Ctrl+Shift+I opens the model picker in the Code tab.
+- **The console opens on its own window,** titled "Developer Tools", usually on the Elements tab. Click **Console** before pasting.
+
+### Make it apply itself (Windows, optional)
+
+[`windows/claude-skin.ahk`](windows/claude-skin.ahk) does for Windows what `mac/apply-skin.sh` does for the Mac. It needs [AutoHotkey v2](https://www.autohotkey.com) (free; `winget install AutoHotkey.AutoHotkey`).
+
+1. Apply the skin by hand once (step 3), so the console has already accepted `allow pasting`. The script can't type that for you.
+2. Double-click `windows\claude-skin.ahk`. A green **H** icon appears in the tray. From now on it waits for the Claude window, and about 8 seconds after it appears, it opens the console, pastes the skin, presses Enter and closes the console. It only pastes when the front window really is the developer console, never sends Escape, and puts your clipboard back.
+3. To start it with Windows, press **Win+R**, type `shell:startup` and press Enter, then right-click in that folder → **New → Shortcut** and point it at `claude-skin.ahk`.
+
+**Ctrl+Alt+S** applies the skin again by hand, for example after the app reloads itself. The tray icon's menu has *Apply skin now*, *Pause auto-apply* and *Open log*. Each run is logged to `windows\apply-skin.log`. If you see `applied` there but no skin, the paste didn't take; open the console and look for a warning about pasting. If the skin sometimes doesn't appear after a cold start, raise `LOAD_WAIT` at the top of the script.
+
+### Known differences on Windows
+
+Tested on Claude 2.19675 for Windows (October 2026):
+
+- **The top-bar changes don't apply.** The Windows title bar is laid out differently, so Back and Forward stay visible, the Search magnifier that replaces the sidebar's (hidden) Search box doesn't appear, and Terminal, Changes and Browser stay in the top bar.
+- **Option+Cmd+B** (show or hide a mod pane) is a Mac key combination. Use the button in the chat's top bar instead.
+- **Rebuilding:** Windows Python reads files in its local encoding by default, so `build.py` now reads and writes UTF-8 explicitly.
 
 ## Make it your own
 
