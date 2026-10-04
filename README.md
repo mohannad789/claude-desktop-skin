@@ -151,7 +151,7 @@ The skin works on Windows with steps 1 to 3 above. Two things are different:
 
 ### Known differences on Windows
 
-Tested on Claude 2.19675 for Windows (October 2026):
+Tested on Claude 2.19675 for Windows (October 2, 2026):
 
 - **The top-bar changes don't apply.** The Windows title bar is laid out differently, so Back and Forward stay visible, the Search magnifier that replaces the sidebar's (hidden) Search box doesn't appear, and Terminal, Changes and Browser stay in the top bar.
 - **Option+Cmd+B** (show or hide a mod pane) is a Mac key combination. Use the button in the chat's top bar instead.
