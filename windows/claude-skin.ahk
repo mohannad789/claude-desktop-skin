@@ -37,26 +37,35 @@ SetTimer Watch, 1000
 Watch()
 return
 
-; A new Claude window (app launch) gets the skin once it has had time to load
+; Each Claude launch gets the skin once, after it has had time to load. This is tracked per Claude *process*,
+; not per window: the window drops out of the list while Claude is minimized or closed to the tray, and tracking
+; it re-ran the whole sequence mid-session every time it came back. A process ID is only forgotten once that
+; process has exited, so only a real relaunch applies the skin again.
 Watch() {
     global seen, paused
-    live := Map()
     for hwnd in WinGetList(MAIN_WIN) {
         if !IsMainWindow(hwnd)
             continue
-        live[hwnd] := true
-        if !seen.Has(hwnd) {
-            seen[hwnd] := true
+        try pid := WinGetPID(hwnd)
+        catch
+            continue
+        if !seen.Has(pid) {
+            seen[pid] := true
             if !paused
                 SetTimer ApplyLaunch.Bind(hwnd), -LOAD_WAIT
         }
     }
-    for hwnd in seen.Clone()     ; forget closed windows so a relaunch applies it again
-        if !live.Has(hwnd)
-            seen.Delete(hwnd)
+    for pid in seen.Clone()      ; forget processes that have exited, so a relaunch applies it again
+        if !ProcessExist(pid)
+            seen.Delete(pid)
 }
 
-ApplyLaunch(hwnd) => ApplySkin("launch", hwnd)
+ApplyLaunch(hwnd) {
+    if WinExist(hwnd)
+        ApplySkin("launch", hwnd)
+    else
+        Log("launch", "skipped: the Claude window closed before the skin could be applied (Ctrl+Alt+S applies it by hand)")
+}
 
 ; The Claude Code CLI is also claude.exe but has no window; this also skips small pop-ups with the same title
 IsMainWindow(hwnd) {
