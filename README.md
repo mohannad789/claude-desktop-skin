@@ -6,11 +6,12 @@ It is plain CSS and JavaScript that runs in the app's own developer console. Not
 
 ![Before and after: the same sidebar shows 14 sessions as Claude ships it, and 33 with the skin](screenshots/before-after.png)
 
-![Claude desktop app with the skin applied](screenshots/overview.png)
+![Claude desktop app with the skin applied, and the Branches task tree on the right](screenshots/overview.png)
 
 <p>
   <img src="screenshots/sidebar.png" alt="The two-column sidebar with project colours and tags" height="420">
-  <img src="screenshots/menu.png" alt="The colour, tag and column menu" height="300">
+  <img src="screenshots/menu.png" alt="The colour, tag, column and session order menu" height="420">
+  <img src="screenshots/task-tree.png" alt="The Branches task tree beside the chat (a separate mod, not published yet)" height="420">
 </p>
 
 <sub>Screenshots use made-up project and session names.</sub>
