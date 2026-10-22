@@ -32,8 +32,6 @@ aside.dframe-sidebar {
   --df-row-gap: 3px;
 }
 
-/* No "…" button on hover over a session (right-click still has every action) */
-aside.dframe-sidebar .df-recents-anchor .group.relative > div.absolute { display: none !important; }
 
 /* Section titles (Routines, Pinned, project names): much less space above and below */
 aside.dframe-sidebar { --df-group-pt: 3px; }                        /* was 12px above */
@@ -41,8 +39,6 @@ aside.dframe-sidebar .df-label-inset { padding-bottom: 1px !important; padding-l
 
 /* Session rows: start the unread dot right at the edge and put the name right after it */
 aside.dframe-sidebar { --df-row-px: 1px; --df-row-gap: 2px; }
-aside.dframe-sidebar .df-recents-anchor button.w-full .df-leading-slot,
-aside.dframe-sidebar .df-recents-anchor button.w-full [class*="min-w-3.5"] { width: 8px !important; min-width: 8px !important; }
 
 /* Hide the top items: New, Artifacts, Routines, Customize (Search stays) */
 aside.dframe-sidebar .static-composer-boot-fade > .shrink-0 > .contents { display: none !important; }   /* New */
@@ -74,7 +70,7 @@ aside.dframe-sidebar .df-recents-anchor .group:hover .dframe-fade-label[data-ove
   -webkit-mask-image: linear-gradient(to right, black calc(100% - 24px), transparent 100%) !important; }
 
 /* Bold session names (delete this block for normal weight) */
-aside.dframe-sidebar .df-recents-anchor button.w-full .dframe-fade-label { font-weight: 600; }
+aside.dframe-sidebar .df-recents-anchor button.w-full .dframe-fade-label { font-weight: 500; }
 
 
 
@@ -102,7 +98,22 @@ aside.dframe-sidebar .df-recents-anchor [class*="group/section"]:has([class*="gr
    (the dash circle in the palette). Pick a colour from the dot on the project's line. */
 aside.dframe-sidebar .df-recents-anchor > [data-cskin-project] { --cskin-c: var(--cskin-color, hsl(220 8% 55%)); }
 aside.dframe-sidebar .df-recents-anchor > [data-cskin-project] [class*="group/section"] {
-  background: color-mix(in srgb, var(--cskin-c) 8%, transparent); border-radius: 8px; transition: background-color .12s ease; }
+  background: color-mix(in srgb, var(--cskin-c) 6%, transparent); border-radius: 8px; transition: background-color .12s ease; }   /* 8% until 2026-10-08 */
+/* the default grey box a little lighter than the coloured ones (asked 2026-10-07) */
+aside.dframe-sidebar .df-recents-anchor > [data-cskin-project]:not([data-cskin-colored]) [class*="group/section"] { background: color-mix(in srgb, var(--cskin-c) 4%, transparent); }
+/* Every project box gets a faint 1px edge in its own colour (grey for the uncoloured ones) so the box's end is
+   visible. Dark mode first (2026-10-18), then light mode too at Cskin's request the same day. */
+aside.dframe-sidebar .df-recents-anchor > [data-cskin-project] [class*="group/section"] {
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--cskin-c) 12%, transparent); }   /* 24%, then 16%: too strong in light mode */
+aside.dframe-sidebar .df-recents-anchor > [data-cskin-project]:not([data-cskin-colored]) [class*="group/section"] {
+  box-shadow: inset 0 0 0 1px hsl(220 8% 45% / 0.08); }
+/* Dark mode: edges a little stronger than light; the uncoloured fill a touch lighter than before, with a light grey edge */
+html[data-mode=dark] aside.dframe-sidebar .df-recents-anchor > [data-cskin-project] [class*="group/section"] {
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--cskin-c) 20%, transparent); }
+html[data-mode=dark] aside.dframe-sidebar .df-recents-anchor > [data-cskin-project]:not([data-cskin-colored]) [class*="group/section"] {
+  background: hsl(220 10% 75% / 0.035); box-shadow: inset 0 0 0 1px hsl(220 10% 80% / 0.075); }
+html[data-mode=dark] aside.dframe-sidebar .df-recents-anchor > [data-cskin-project]:not([data-cskin-colored]) [class*="group/section"]:has([class*="group/labelrow"]:hover) {
+  background: hsl(220 10% 75% / 0.12); }
 aside.dframe-sidebar .df-recents-anchor > [data-cskin-project] [class*="group/labelrow"]::before {
   background: color-mix(in srgb, var(--cskin-c) 60%, transparent); }
 aside.dframe-sidebar .df-recents-anchor > [data-cskin-project] [class*="group/labelrow"]:hover::before { background: var(--cskin-c); }
@@ -146,8 +157,27 @@ aside.dframe-sidebar [data-row][data-selected="focused"], aside.dframe-sidebar [
 aside.dframe-sidebar [data-row][data-selected="focused"] button.w-full, aside.dframe-sidebar [data-row][data-selected="open"] button.w-full {
   color: hsl(var(--text-000)) !important; }
 
-/* Collapsed projects (the arrow on a project's line): only the line shows; hovering the project opens it */
-aside.dframe-sidebar .df-recents-anchor > [data-cskin-folded]:not(:hover) [class*="group/section"] > .contents { display: none !important; }
+/* Collapsed projects (the arrow on a project's line): only the line shows. Hovering the project opens it for a
+   look: tag.js sets data-cskin-peek after a short pause and takes it away 0.6 s after the pointer leaves, and
+   the sessions slide open and closed instead of popping. While open for a look, the project's top bar keeps its
+   hover look (thick line, arrow, colour dot) wherever the pointer is in the project. Collapsing with the arrow
+   closes it at once; it opens for a look again only after the pointer has left and come back. (2026-10-07) */
+/* The app's own collapse (aria-expanded=false, its sessions in a .hidden box) is not reachable through the skin
+   and left "we are brndn" with sessions nothing could show: its box shows like a normal one. */
+aside.dframe-sidebar .df-recents-anchor > [data-cskin-project] [class*="group/section"] > .hidden { display: contents !important; }
+/* height animates from 0 to the row's real height (interpolate-size), so the slide lasts the whole 0.45 s; a
+   max-height of 80px for a 20px row finished in a few frames and still looked instant */
+aside.dframe-sidebar { interpolate-size: allow-keywords; }
+aside.dframe-sidebar .df-recents-anchor > [data-cskin-folded] [class*="group/section"] > :is(.contents, .hidden) > * {
+  overflow: hidden; height: 0; opacity: 0; margin-top: -1px;
+  transition: height .3s ease, opacity .2s ease, margin-top .3s ease; }
+aside.dframe-sidebar .df-recents-anchor > [data-cskin-folded][data-cskin-peek] [class*="group/section"] > :is(.contents, .hidden) > * {
+  height: auto; opacity: 1; margin-top: 0;
+  transition: height .45s cubic-bezier(.3, .6, .3, 1), opacity .35s ease .1s, margin-top .45s ease; }
+aside.dframe-sidebar .df-recents-anchor > [data-cskin-peek] [class*="group/labelrow"]::before { height: 7px; background: var(--cskin-c); transition-delay: 0s; }
+aside.dframe-sidebar .df-recents-anchor > [data-cskin-peek] [class*="group/section"] { background: color-mix(in srgb, var(--cskin-c) 17%, transparent); }
+aside.dframe-sidebar .df-recents-anchor > [data-cskin-peek] :is(.cskin-chev, .cskin-swatch) { opacity: 1; visibility: visible; transition: opacity .1s ease, visibility 0s linear 0s, transform .15s ease; }
+aside.dframe-sidebar .df-recents-anchor > [data-cskin-peek] .cskin-tags { opacity: 0; }
 
 /* Message box: at most about 8 lines tall, then it scrolls */
 .dframe-content [class*="max-h-96"]:has(> .ProseMirror) { max-height: calc(8lh + 6px) !important; }
@@ -155,7 +185,8 @@ aside.dframe-sidebar .df-recents-anchor > [data-cskin-folded]:not(:hover) [class
 /* Top-right buttons Terminal / Changes / Browser live in the ⋮ menu instead (added by tag.js) */
 .dframe-content .epitaxy-titlebar button[aria-label="Terminal"],
 .dframe-content .epitaxy-titlebar button[aria-label="Changes"],
-.dframe-content .epitaxy-titlebar button[aria-label="Browser"] { display: none !important; }
+.dframe-content .epitaxy-titlebar button[aria-label="Browser"],
+.dframe-content .epitaxy-titlebar button[aria-label="Files"] { display: none !important; }   /* Files: moved into the ⋮ menu by tag.js, like the others (2026-10-09) */
 .cskin-menu-item { cursor: default; }
 .cskin-menu-item:hover { background: var(--cds-fill-ghost-hover, hsl(var(--text-500) / 0.08)); }
 .cskin-menu-item .cskin-keys { color: var(--cds-text-muted, hsl(var(--text-400))); margin-left: 12px; }
@@ -174,17 +205,32 @@ aside.dframe-sidebar .df-titlebar .cskin-search { display: flex; align-items: ce
   width: 26px; height: 26px; margin-left: 6px; border: 0; border-radius: 7px; background: none; cursor: pointer;
   color: hsl(var(--text-300)); -webkit-app-region: no-drag; }
 aside.dframe-sidebar .df-titlebar .cskin-search:hover { background: hsl(var(--text-500) / 0.12); color: hsl(var(--text-100)); }
+/* New session ＋, left of search (the sidebar's own New row is out of sight); both a little narrower so they fit
+   beside the window buttons at the narrowest sidebar */
+aside.dframe-sidebar .df-titlebar .cskin-new { display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  width: 24px; height: 26px; margin-left: 4px; border: 0; border-radius: 7px; background: none; cursor: pointer;
+  color: hsl(var(--text-300)); -webkit-app-region: no-drag; }
+aside.dframe-sidebar .df-titlebar .cskin-new:hover { background: hsl(var(--text-500) / 0.12); color: hsl(var(--text-100)); }
+aside.dframe-sidebar .df-titlebar .cskin-search { width: 24px; margin-left: 0; flex-shrink: 0; }
+/* no Hide sidebar button in the sidebar's top bar (⌘B does it); frees room for ＋ and search */
+aside.dframe-sidebar > .df-titlebar > div:has(> button[aria-label="Hide sidebar"]) { display: none !important; }
 
 /* Sidebar width: our own resize handle on the right edge replaces the app's (which stops at 242 px).
    Range 170–600 px; double-click the edge to go back to the app's width. */
 aside.dframe-sidebar button[aria-label="Resize sidebar"] { display: none !important; }
-aside.dframe-sidebar > .cskin-resize { position: absolute; top: 0; bottom: 0; right: -4px; width: 8px; z-index: 50;
+/* The app's own "Resize sidebar" handle (12px) sat under the skin's and peeked out on both sides; dragging those edges
+   changed the app's own width setting and pushed the chat text. It is switched off; the skin's handle covers the edge. */
+aside.dframe-sidebar > [aria-label="Resize sidebar"] { pointer-events: none !important; opacity: 0 !important; }
+/* Nothing inside the sidebar may draw past its right edge (a stray grey strip and line showed beside it, 2026-10-06).
+   The skin's resize handle sits just inside the edge so the clip doesn't cut it. */
+aside.dframe-sidebar { overflow: clip !important; }
+aside.dframe-sidebar > .cskin-resize { position: absolute; top: 0; bottom: 0; right: 0; width: 8px; z-index: 50;
   cursor: col-resize; -webkit-app-region: no-drag; }
-aside.dframe-sidebar > .cskin-resize:hover { background: linear-gradient(to right, transparent 3px, hsl(var(--accent-brand) / 0.5) 3px, hsl(var(--accent-brand) / 0.5) 5px, transparent 5px); }
+/* No hover colour on the handle (asked 2026-10-05): only the resize cursor shows, like the right-hand pane. */
 body.cskin-resizing, body.cskin-resizing * { cursor: col-resize !important; user-select: none !important; }
 
 /* Collapsed projects show their first session's name, small, in place of the line (until hovered) */
-aside.dframe-sidebar .df-recents-anchor > [data-cskin-folded]:not(:hover) [class*="group/labelrow"]::before {
+aside.dframe-sidebar .df-recents-anchor > [data-cskin-folded]:not([data-cskin-peek]) [class*="group/labelrow"]::before {
   content: attr(data-cskin-first); height: auto; background: none !important; left: 5px; right: 5px;
   font-size: 9px; font-weight: 550; line-height: 12px; color: hsl(var(--text-400)); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
@@ -217,14 +263,13 @@ aside.dframe-sidebar [class*="group/labelrow"]:hover .cskin-tags { opacity: 0; t
 
 /* Text-size control in the bottom bar */
 aside.dframe-sidebar .cskin-fs { display: flex; align-items: center; gap: 2px; margin-right: 4px; flex: none; }
-aside.dframe-sidebar .cskin-fs button { border: 0; background: none; cursor: pointer; padding: 2px 4px; border-radius: 5px;
-  font-size: 10px; color: hsl(var(--text-300)); }
+aside.dframe-sidebar .cskin-fs button { border: 0; background: none; cursor: pointer; padding: 0; border-radius: 5px; width: 20px; height: 20px;
+  display: inline-flex; align-items: center; justify-content: center; line-height: 1; font-size: 10px; color: hsl(var(--text-300)); }
 aside.dframe-sidebar .cskin-fs button:hover { background: hsl(var(--text-500) / 0.12); color: hsl(var(--text-100)); }
 aside.dframe-sidebar .cskin-fs .cskin-fs-s { font-size: 9px; }
 aside.dframe-sidebar .cskin-fs .cskin-fs-l { font-size: 13px; font-weight: 600; }
-aside.dframe-sidebar .cskin-fs-v { font-size: 9.5px; color: hsl(var(--text-400)); min-width: 22px; text-align: center; font-variant-numeric: tabular-nums; }
 /* Collapsed + tagged: leave room on the right for the tag next to the session preview */
-aside.dframe-sidebar .df-recents-anchor > [data-cskin-folded]:not(:hover) [class*="group/labelrow"]:has(.cskin-tags)::before { right: calc(var(--cskin-tag-w, 30%) + 8px); }
+aside.dframe-sidebar .df-recents-anchor > [data-cskin-folded]:not([data-cskin-peek]) [class*="group/labelrow"]:has(.cskin-tags)::before { right: calc(var(--cskin-tag-w, 30%) + 8px); }
 aside.dframe-sidebar .df-recents-anchor [class*="group/labelrow"]:has(.cskin-tags):not(:hover)::before { right: max(15%, 22px, calc(var(--cskin-tag-w, 30%) + 8px)); }
 
 /* Chat area: half the side spacing around the messages and the message box (about 41px each side, now about 20px) */
@@ -236,13 +281,17 @@ aside.dframe-sidebar .df-recents-anchor [class*="group/labelrow"]:has(.cskin-tag
 /* Message action bar (copy / branch / pin / read aloud / time): always visible instead of on hover, and smaller */
 .epitaxy-chat-panel [data-cds="MessageActions"]:not([data-deferred]) { opacity: 1 !important; scale: 1 !important; visibility: visible !important; pointer-events: auto !important; zoom: .8; }
 
+/* The "Mark as read" button next to the time under the last reply (only on sessions the skin keeps unread) */
+.cskin-read-btn { order: 99; display: inline-flex; align-items: center; gap: 4px; margin-left: 10px; padding: 2px 10px 2px 7px; border: 0;
+  border-radius: 999px; background: hsl(var(--accent-brand) / 0.18); color: hsl(var(--accent-brand)); font: inherit; font-size: 12.5px; font-weight: 500; cursor: pointer; }
+.cskin-read-btn:hover { background: hsl(var(--accent-brand) / 0.3); }
 
 /* Tool lines in the chat ("Ran 4 commands", "Probed ..."): timestamp-sized text, less space above and below */
-.epitaxy-transcript-typography [data-cds="TurnStatus"]:not([data-testid="code-working-line"] *) { zoom: .75; margin-block: -3px; }
+.epitaxy-transcript-typography [data-cds="TurnStatus"] { zoom: .75; margin-block: -3px; }
 
 /* Working status line under the last message ("37s · 189 tokens · Thinking..."): smaller, and the 48px of
    empty space below the last message is cut to 18px (see below) */
-.epitaxy-transcript-typography [data-testid="code-working-line"] [data-cds="TurnStatus"] { zoom: .85; }
+/* (now covered by the status-line pill below, which makes every status line this size) */
 /* The space after the last message (the app keeps 48px visible above the message box): 30px less, so 18px */
 [data-testid="transcript-sizer"] > [data-testid="transcript-spacer"]:last-child { margin-top: -30px; }
 
@@ -268,6 +317,7 @@ html[data-cskin-panes-hidden] div:has(> .tiles-shell > [data-tile-host="plugin"]
 .epitaxy-titlebar .cskin-pane-toggle:hover { background: hsl(var(--text-500) / 0.12); color: hsl(var(--text-100)); }
 .epitaxy-titlebar .cskin-pane-toggle.on { color: hsl(var(--text-100)); }
 
+
 /* Mod boxes are drawn in a sealed layer (shadow DOM), but they size themselves from shared settings
    (--cds-font-size-body, --cds-h-control...), which the skin sets on them from outside.
    The row above the message box: smaller text and buttons, a thinner strip */
@@ -276,12 +326,288 @@ html[data-cskin-panes-hidden] div:has(> .tiles-shell > [data-tile-host="plugin"]
   --cds-pad-md: 6px; --cds-pad-xs: 3px; --cds-radius: 6px;
   --cds-font-size-body--sm: 10.5px; --cds-h-control--sm: 19px; --cds-radius--sm: 6px; }
 /* The side pane: smaller text, buttons and spacing, and a smaller title */
-[data-tile-host="plugin"] [class*="contain:none"] { font-size: 11.5px; --cds-font-size-body: 11.5px; --cds-leading-body: 1.35; --cds-h-control: 21px;
+[data-tile-host="plugin"] [class*="contain:none"] { font-size: var(--cskin-pane-fs, 11.5px); --cds-font-size-body: var(--cskin-pane-fs, 11.5px); --cds-leading-body: 1.35;
+  --cds-h-control: calc(var(--cskin-pane-fs, 11.5px) + 9.5px);
   --cds-pad-md: 7px; --cds-pad-lg: 8px; --cds-pad-xs: 3px; --cds-radius: 6px;
-  --cds-font-size-body--sm: 11px; --cds-h-control--sm: 21px; --cds-radius--sm: 6px; }
+  --cds-font-size-body--sm: calc(var(--cskin-pane-fs, 11.5px) - 0.5px); --cds-h-control--sm: calc(var(--cskin-pane-fs, 11.5px) + 9.5px); --cds-radius--sm: 6px; }
+/* Less empty space at the top of a mod pane: a shorter header and less padding around the content */
+[data-tile-host="plugin"] [data-pane-root] > [data-top-right] { height: 26px; }
+/* 2px at the sides (was 8px): Branches' boxes reach almost to the pane's edge; the mod keeps its text one cell in */
+[data-tile-host="plugin"] [data-pane-root] div:has(> [data-engine-site="Pane"]) { padding: 2px 2px 8px !important; }
+/* no pane title ("Branches"): the space is kept so the drag handle stays put */
+[data-tile-host="plugin"] [data-pane-root] > [data-top-right] > span.select-none { visibility: hidden; }
+/* The pane's own text size buttons (tag.js), in its top corner */
+[data-tile-host="plugin"] .cskin-pfs { -webkit-app-region: no-drag; position: relative; z-index: 2; display: inline-flex; align-items: center; gap: 1px; margin-right: 4px; color: hsl(var(--text-300)); }
+[data-tile-host="plugin"] .cskin-pfs button { border: 0; background: none; color: inherit; cursor: pointer; padding: 0; border-radius: 5px; line-height: 1;
+  width: 20px; height: 20px; display: inline-flex; align-items: center; justify-content: center; }
+[data-tile-host="plugin"] .cskin-pfs button:hover { background: hsl(var(--text-500) / 0.12); color: hsl(var(--text-100)); }
+[data-tile-host="plugin"] .cskin-pfs .cskin-fs-s { font-size: 9px; }
+[data-tile-host="plugin"] .cskin-pfs .cskin-fs-l { font-size: 13px; font-weight: 600; }
+/* Branches counts as symbols in the chat's top bar (tag.js) */
+.epitaxy-titlebar .cskin-bsum { display: inline-flex; align-items: center; gap: 7px; height: 24px; padding: 0 7px; margin-right: 2px; border: 0; border-radius: 7px;
+  background: none; color: hsl(var(--text-300)); font: inherit; font-size: 11px; font-variant-numeric: tabular-nums; cursor: pointer; }
+/* the Branches summary is the pane button while it shows */
+.epitaxy-titlebar:has(.cskin-bsum) .cskin-pane-toggle { display: none !important; }
+.epitaxy-titlebar .cskin-bsum:hover { background: hsl(var(--text-500) / 0.12); }
+.epitaxy-titlebar .cskin-bsum-i { display: inline-flex; align-items: center; gap: 2px; }
+.epitaxy-titlebar .cskin-bsum-overdue, .epitaxy-titlebar .cskin-bsum-needs { color: #d4472f; font-weight: 600; }
+/* Message box text two pixels smaller than the replies (the size is worked out in tag.js) */
+.epitaxy-prompt [contenteditable="true"], .epitaxy-prompt textarea { font-size: var(--cskin-composer-fs, inherit) !important; }
 [data-tile-host="plugin"] [data-pane-root] [data-top-right] span { font-size: 11.5px !important; }
 /* Pane width chosen with the skin's own drag (tag.js): the app's drag stops at 280px */
 html[data-cskin-pane-w] div:has(> .tiles-shell > [data-tile-host="plugin"]) { flex: 0 0 var(--cskin-pane-w) !important; }
 
 /* Replies use the full width: Claude keeps up to 56px empty on the right of every reply (a "reading stop") */
 .epitaxy-chat-panel [data-cds="AssistantMessage"] { --cds-assistant-message-text-stop: 0px !important; }
+
+/* Session order (see tag.js): the "Order" list at the bottom of a project's colour menu */
+#cskin-palette .cskin-order { border-top: 1px solid hsl(var(--text-500) / 0.12); margin-top: 4px; padding-top: 4px; max-width: 180px; }
+#cskin-palette .cskin-order-h { font-size: 9px; color: hsl(var(--text-400)); padding: 0 3px 2px; }
+#cskin-palette .cskin-order-row { display: flex; align-items: center; gap: 2px; padding: 1px 3px; border-radius: 5px; }
+#cskin-palette .cskin-order-row:hover { background: hsl(var(--text-500) / 0.08); }
+#cskin-palette .cskin-order-name { flex: 1; min-width: 0; font-size: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#cskin-palette .cskin-order-row button { border: 0; background: none; padding: 0 3px; font-size: 8px; color: hsl(var(--text-400)); cursor: pointer; border-radius: 3px; }
+#cskin-palette .cskin-order-row button:hover:not(:disabled) { color: hsl(var(--text-000)); background: hsl(var(--text-500) / 0.15); }
+#cskin-palette .cskin-order-row button:disabled { opacity: .25; cursor: default; }
+
+/* Chat top bar: no project-folder chip ("MISC" with Show in Finder / Copy path / Change folder / Open in terminal);
+   Cskin never uses it (2026-10-05). It is the small 20px-high menu button beside the session title. */
+.epitaxy-titlebar span:has(> button[aria-haspopup="menu"][class*="h-[20px]"][class*="gap-0.75"]) { display: none !important; }
+/* Sidebar footer: no Send feedback (ant) button */
+aside.dframe-sidebar [data-testid="code-sidebar-feedback-button"] { display: none !important; }
+
+/* 2026-10-06 spacing (Cskin):
+   - The Routines heading (the only section title shown as text, outside the project list) sat 4px from the edge:
+     move it in to line up with the session dots. Project titles inside the list are lines and are not touched. */
+aside.dframe-sidebar .df-label-inset:not(.df-recents-anchor *) { padding-left: 8px !important; }
+/* - The right-hand pane's gap on its right and at the bottom (8px) now matches the 3px at the top. */
+[data-testid="pending-nav-body"] > .relative.h-full.w-full > div > div:has(.tiles-shell) { padding-right: 3px !important; padding-bottom: 3px !important; }
+/* - The message box: less space beside the text (box 8px -> 5px each side, text 4px -> 2px, right gap for the
+     send button 30px -> 24px) */
+.epitaxy-prompt [class*="bg-surface-3"][class*="rounded-composer"] { padding-left: 5px !important; padding-right: 5px !important; }
+.epitaxy-prompt [class*="max-h-96"]:has(> .ProseMirror) { padding-left: 0 !important; }   /* was 2px: put the cursor 2px right of the placeholder (2026-10-15) */
+.epitaxy-prompt [class*="pr-[var(--cmp"] { padding-right: 24px !important; }
+
+/* Simulator panel width chosen with the skin's own drag (tag.js): the app locks its divider in a narrow window */
+html[data-cskin-sim-w] div:has(> .tiles-shell > [data-tile-host^="simulator"]) { flex: 0 0 var(--cskin-sim-w) !important; min-width: 0 !important; }
+/* The message box's placeholder ("Type a message") and its suggested next message are separate layers: the same smaller size as the typed text */
+.epitaxy-prompt [data-composer-placeholder], .epitaxy-prompt [data-composer-placeholder-ghost], .epitaxy-prompt [data-placeholder-fit-probe],
+.epitaxy-prompt [data-prompt-suggestion-ghost] { font-size: var(--cskin-composer-fs, inherit) !important; }
+/* The mod pane's ✕ closed it for good: the skin's toggle (and Option+Cmd+B) only show or hide a pane that exists, so
+   nothing could bring it back (2026-10-06). Hide the pane with the toggle instead; the ✕ is gone. */
+[data-tile-host="plugin"] [data-pane-root] > [data-top-right] button[aria-label="Close"] { display: none !important; }
+
+/* Background tasks pane: its list in the same text size as the Branches pane's tasks (asked 2026-10-06); the pane's
+   own header keeps the size of the other pane headers */
+[data-tile-host="tasks"] :is(span, h3, p, a, button, div, pre, code):not(:has(svg)):not([class*="pl-[4px]"]) {
+  font-size: var(--cskin-pane-fs, 9.5px) !important; line-height: 1.45 !important; }
+
+/* Branches pane: no scroll anchoring. A note box growing a line at the bottom of a full pane made the browser's
+   anchoring and its keep-the-cursor-in-view fight, and the pane flickered up and down (2026-10-07) */
+[data-engine-site]:has([data-tile-host="plugin"]), [data-tile-host="plugin"] [data-engine-site], .dframe-pane-scroller:has([data-tile-host="plugin"]) { overflow-anchor: none !important; }
+[data-tile-host="plugin"] * { overflow-anchor: none; }
+
+/* No number hints on the sessions while Command is held (asked 2026-10-07: Cmd+Enter sends, and the numbers kept
+   catching his eye). The row keeps its usual look; Cmd+number still switches sessions. */
+aside [data-jump-hint-row] > kbd, aside [data-jump-hint-row] .df-jump-hint { display: none !important; }
+aside [data-jump-hint-row]:has(> kbd) [data-row-label="iconless"] { mask-image: none !important; }
+aside [data-jump-hint-row]:has(> kbd) :is([data-row-decoration], .df-tail-mark) { visibility: visible !important; }
+
+
+/* Branches pane: the app caps the pane's scrolling area at a fixed height that is shorter than the pane, which left
+   a blank strip at the bottom over the last notes (2026-10-07); it now runs to the bottom of the pane */
+[data-tile-host="plugin"] [data-engine-site] { max-height: 100% !important; }
+[data-tile-host="plugin"] :has(> [data-engine-site]) { padding-bottom: 3px !important; }
+
+/* Status lines between messages ("Ran 3 commands", "Found ...", "Message from ...", "Background command completed", the live "1.2k tokens" line): small (85%) and in a
+   light grey pill, so they read apart from real messages (asked 2026-10-07) */
+.epitaxy-chat-panel [data-cds="TurnStatus"] > [data-cds-row],
+.epitaxy-chat-panel [data-cds="TurnStatusStep"] > [data-cds-row] {                 /* "Message from subagent" */
+  zoom: .85; width: auto; max-width: 100%; box-sizing: border-box;
+  /* 2026-10-21: was width: fit-content, which made the app's new wording picker (data-cds-phrases) flip between long
+     and short wordings ~130 times a second. Now the row keeps its full width and the pill is cut off just after its
+     last item by clip-path (no effect on layout); tag.js pillWidths() sets --cskin-pill-w. */
+  clip-path: inset(0 calc(100% - var(--cskin-pill-w, 100%)) 0 0 round 999px);
+  background: hsl(var(--text-500) / 0.08); border-radius: 999px; padding-inline: 10px !important; }
+
+/* A line under the copy / pin / time bar at the end of each of Claude's replies, so the end of a reply is easy to
+   spot (asked 2026-10-07) */
+.epitaxy-chat-panel [data-cds="AssistantMessage"] [data-cds="MessageActions"] {
+  align-self: stretch; padding-bottom: 10px; border-bottom: 1px solid hsl(var(--text-500) / 0.18); }
+
+/* Add-on notices in the transcript ("branches  reloaded (5 hooks: ...)"): same small grey pill as the status lines. */
+.epitaxy-chat-panel [data-plugin-log] {
+  zoom: .85; width: fit-content; max-width: 100%; box-sizing: border-box;
+  background: hsl(var(--text-500) / 0.08); border-radius: 999px; padding: 1px 10px !important; }
+.epitaxy-chat-panel [data-plugin-log] :is(.text-body, .text-caption) { font-size: 11.5px !important; line-height: 1.3 !important; color: rgb(137 135 129) !important; }
+
+
+/* Read aloud pause / play / stop (tag.js): floats above the message box while the message being read is scrolled
+   out of view (Claude's own pause is next to the speaker otherwise). */
+.cskin-tts { display: inline-flex; align-items: center; gap: 2px; }
+.cskin-tts button { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; border: 0; border-radius: 7px;
+  background: none; color: hsl(var(--text-300)); cursor: pointer; padding: 0; }
+.cskin-tts button:hover { background: hsl(var(--text-500) / 0.12); color: hsl(var(--text-100)); }
+/* both icons white, no orange (asked 2026-10-08); the pill itself stays dark */
+#cskin-tts-float button { color: #fff; }
+#cskin-tts-float button:hover { color: #fff; background: hsl(0 0% 100% / 0.14); }
+#cskin-tts-float .cskin-tts-grip { display: inline-flex; align-items: center; justify-content: center; width: 14px; height: 26px; margin-left: 4px;
+  color: hsl(0 0% 100% / 0.45); cursor: grab; touch-action: none; }
+#cskin-tts-float .cskin-tts-grip:hover { color: hsl(0 0% 100% / 0.8); }
+#cskin-tts-float.cskin-dragging, #cskin-tts-float.cskin-dragging .cskin-tts-grip { cursor: grabbing; }
+#cskin-tts-float .cskin-tts-speed { width: auto; min-width: 34px; padding: 0 6px; font: 600 11px/1 -apple-system, system-ui; }
+#cskin-tts-float { position: fixed; z-index: 60; padding: 3px; border-radius: 999px; background: hsl(var(--bg-000));
+  box-shadow: 0 0 0 1px hsl(var(--text-500) / 0.15), 0 4px 14px hsl(0 0% 0% / 0.12); }
+#cskin-tts-float button { border-radius: 999px; }
+
+/* Answered-questions summary card (after AskUserQuestion): grey fill so it stands out when scrolling */
+.epitaxy-chat-panel [data-tool-anchor] > .epitaxy-card-outline-inset.select-text:has(> div > p.text-secondary + p.text-primary) {
+  background: hsl(var(--text-500) / 0.10) !important;
+}
+
+/* Input box: let the text scroll all the way to the box edge (the app clips it 8px inside, which looks like bars),
+   with a soft fade at top and bottom instead of a hard cut */
+.epitaxy-prompt [class*="max-h-96"]:has(> .ProseMirror) {
+  margin-block: -8px !important; padding-top: 10px !important; padding-bottom: 10px !important;
+  max-height: calc(8lh + 22px) !important; min-height: calc(var(--cmp-row-h) + 16px) !important;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 9px, #000 calc(100% - 9px), transparent 100%);
+          mask-image: linear-gradient(to bottom, transparent 0, #000 9px, #000 calc(100% - 9px), transparent 100%);
+}
+/* keep the "Type / for commands" placeholder on the cursor's line after the scroller stretch above */
+.epitaxy-prompt div.relative:has(> [class*="max-h-96"] > .ProseMirror) > span.pointer-events-none.absolute { top: 10px !important; }
+/* same for the suggested-prompt ghost text (a separate absolute overlay, 2px top padding by default) */
+.epitaxy-prompt div.relative:has(> div.relative > [class*="max-h-96"] > .ProseMirror) > div.absolute.inset-0.overflow-hidden { padding-top: 12px !important; }
+
+/* Folded project: when the peek closes, the arrow and colour dot vanish at once (no 0.6 s linger over the tags) */
+aside.dframe-sidebar .df-recents-anchor > [data-cskin-folded]:not([data-cskin-peek]) [class*="group/labelrow"]:not(:hover) :is(.cskin-chev, .cskin-swatch) {
+  opacity: 0 !important; visibility: hidden !important; transition: none !important; }
+
+/* "Message from subagent": its TurnStatusStep is not inside a TurnStatus, so it missed the 75% size rule above
+   and came out bigger than the other status lines (2026-10-09) */
+.epitaxy-transcript-typography [data-cds="TurnStatusStep"]:not([data-cds="TurnStatus"] *) { zoom: .75; margin-block: -3px; }
+
+
+/* Add-on panes (task tree): 4px of room at the top of the scroll area, so the blue focus ring of the Search box
+   isn't cut off by the pane's top edge (2026-10-14) */
+[data-tile-host="plugin"] .pointer-events-auto.isolate[class*="overflow-y"] { padding-top: 4px !important; }
+
+/* Session rail (new in the 2026-10-14 app update): moved into the ⋮ menu by tag.js like Terminal, Changes, Browser, Files */
+.dframe-content .epitaxy-titlebar button[aria-label$="session rail"] { display: none !important; }
+
+/* 2026-10-14 app update. Forks: a forked session is filed under the one it came from with a guide line and an
+   extra indent; the skin keeps every session flat in its project instead (the order is the skin's own anyway). */
+aside.dframe-sidebar .df-family { --df-row-indent: 0px !important; }
+aside.dframe-sidebar .df-family::before, aside.dframe-sidebar .df-family::after { display: none !important; }
+/* Status dots moved to the right end of the row and shrank to 6px: back to 8px */
+aside.dframe-sidebar [data-row-decoration] [data-cds="Pulse"] { width: 8px !important; height: 8px !important; }
+/* The skin's sticky unread: idle sessions have no mark any more, so it draws its own dot where the app's sits,
+   in the app's unread colour; it gives way to the row's "..." button on hover like the app's dots do */
+aside.dframe-sidebar [data-row][data-cskin-unread]::after { content: ""; position: absolute; top: 50%; right: 9px; width: 8px; height: 8px;
+  transform: translateY(-50%); border-radius: 50%; background: var(--cds-fill-accent); pointer-events: none; }
+/* 2026-10-14 update: some rows got a second grey "description" line (in the mixed list it just repeats the project
+   name, e.g. "Trading" under "📈 Trading"); hidden, so every row is one line again */
+aside.dframe-sidebar [data-row] .df-row-description { display: none !important; }
+aside.dframe-sidebar [data-row][data-described] > button[data-row-main-button] { height: var(--df-row-h) !important; min-height: 0 !important; }
+/* 2026-10-14 update sets --df-row-h: 28px (and a 2px gap) on each row, under the sidebar's own 20px: put the rows back */
+aside.dframe-sidebar [data-row], aside.dframe-sidebar [data-row] > button[data-row-main-button] { --df-row-h: 20px !important; }
+aside.dframe-sidebar [data-row] { margin-bottom: 0 !important; }
+
+/* Cursor sat ~1px above the placeholder / suggestion text: the typing area starts 1px lower (2026-10-15) */
+.epitaxy-prompt [class*="max-h-96"]:has(> .ProseMirror) { padding-top: 13px !important; max-height: calc(8lh + 25px) !important; min-height: calc(var(--cmp-row-h) + 17px) !important; }
+
+/* Sidebar top bar, tighter (2026-10-15): the app reserves 74px for the window buttons, which only need ~52px,
+   and the row ran 8px past the sidebar (magnifier clipped). Smaller spacer, narrower Chat/Code switch, small gaps. */
+aside.dframe-sidebar > .df-titlebar > .shrink-0:first-child { width: 54px !important; }
+aside.dframe-sidebar > .df-titlebar > .static-composer-boot-fade { margin-left: 6px !important; margin-right: 0 !important; }
+aside.dframe-sidebar > .df-titlebar [role=radiogroup][aria-label="Mode"] [role=radio] { width: 28px !important; min-width: 0 !important; }
+aside.dframe-sidebar > .df-titlebar .cskin-new { margin-left: 6px !important; }
+
+/* Session rows, 2026-10-15: names start 4px further left (in line with collapsed project names); status dots 1px
+   further right (same gap right as top/bottom); the skin's own unread dot now keeps the name clear of it, so the
+   name fades out before the dot like it does for the app's dots */
+aside.dframe-sidebar [data-row] [data-row-label] { padding-inline-start: 4px !important; }   /* [data-row-label]: also reaches rows with a (hidden) description line, whose name sits one level deeper */
+aside.dframe-sidebar [data-row][data-cskin-unread]::after { right: 7px !important; }
+aside.dframe-sidebar [data-row] [data-row-decoration] { margin-inline-end: -1px; }
+aside.dframe-sidebar [data-row][data-cskin-unread] [data-row-label],
+aside.dframe-sidebar [data-row][data-described]:has([data-row-decoration] [role=img]) [data-row-label] { padding-inline-end: 12px !important; }   /* described rows: the app keeps no room for its own dot either */
+aside.dframe-sidebar [data-row][data-cskin-unread] .dframe-fade-label[data-overflowing],
+aside.dframe-sidebar [data-row][data-described]:has([data-row-decoration] [role=img]) .dframe-fade-label[data-overflowing] {
+  -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 12px), transparent 100%) !important; }
+
+/* 2026-10-15: no "⋮" button on a session row (right-click has the same menu); the old rule stopped matching after the
+   update. The status dot no longer hides on hover, since nothing takes its place. */
+aside.dframe-sidebar [data-row] div.absolute:has(> button[aria-label^="More options"]) { display: none !important; }
+aside.dframe-sidebar [data-row] [data-row-decoration] { opacity: 1 !important; }
+
+/* No hover popups from session rows (2026-10-15): tag.js tags popups that open while hovering a session; the name
+   tooltip is also matched directly (session names carry a hidden status line only those tooltips have) */
+.cskin-nohover { display: none !important; }
+/* 2026-10-19: the session hover cards ("Claude asked · …" 440px, and the summary card 340px) still slipped through
+   the hover check above at times (their body loads after the popup opens), so they are hidden by their own class. */
+.epitaxy-root[class*="--preview-card-min-w:440px"], .epitaxy-root[class*="--preview-card-min-w:340px"] { display: none !important; }
+[data-cds="Tooltip"]:has([role=tooltip] .sr-only[role=status]) { display: none !important; }
+
+/* 2026-10-18: since the update the chat column's left gutter comes from the (hidden) session rail, 24px against 8px
+   on the right; both sides 8px again (messages and the message box move together) */
+.epitaxy-chat-panel [class*="--chat-column-gutter-start"] { --chat-gutter-start: 8px !important; }
+
+/* Side chat (the session pane on the right): messages two sizes smaller than the main chat, 12px instead of 14px,
+   so more words fit on its narrow lines (asked 2026-10-18). The reply box keeps its size. */
+[data-perf-region="side_pane"][data-perf-screen="session"] :is(.prose, .prose :is(p, li, h1, h2, h3, h4, td, th, blockquote), .cds-user-message-body, .cds-user-message-body p) {
+  font-size: 12px !important; line-height: 17px !important; }
+
+/* Claude's question card, new design (2026-10-18; the old rules for the previous card were removed, copy in
+   removed-question-rules-2026-10-18.css): 50% wider (the app caps it at 480px), "1 of 4" on its own small line above
+   the question instead of beside it, and option titles bold so they stand apart from their descriptions */
+.epitaxy-chat-panel .epitaxy-approval-card:has(.epitaxy-answer-option) { max-width: min(720px, 100%) !important; width: 100% !important; }
+.epitaxy-chat-panel .epitaxy-approval-card:has(.epitaxy-answer-option) > div:first-child:has(> span.text-caption) {
+  flex-direction: column-reverse !important; align-items: stretch !important; gap: 2px !important; }
+.epitaxy-chat-panel .epitaxy-approval-card:has(.epitaxy-answer-option) > div:first-child > span.text-caption {
+  margin: 0 !important; align-self: flex-end; }
+.epitaxy-chat-panel .epitaxy-answer-option .text-body.text-primary { font-weight: 600 !important; }
+
+/* Weekly usage day dots (tag.js usageDots, 2026-10-18): 6 dots split the Weekly bar into 7 days from the reset;
+   today's end dot is darker, red once usage has passed it */
+.cskin-udots { position: absolute; inset: 0; pointer-events: none; }
+.cskin-udots i { position: absolute; top: 50%; width: 4px; height: 4px; border-radius: 50%; transform: translate(-50%, -50%);
+  background: hsl(var(--text-500) / 0.45); }
+.cskin-udots b { position: absolute; top: 0; bottom: 0; background: hsl(var(--text-100) / 0.13); border-radius: 2px; }   /* today's gap; moves on at midnight */
+.cskin-udots i.fill { background: rgb(255 255 255 / 0.7); }
+.cskin-udots i.today { width: 5px; height: 5px; background: hsl(var(--text-100) / 0.75); }
+.cskin-udots i.over { width: 6px; height: 6px; background: #e0402a; box-shadow: 0 0 0 1px rgb(255 255 255 / 0.9); }
+
+/* 2026-10-18: with the Branches pane at a fixed width, the chat must take all the space left. After a browser pane
+   was opened and closed, the app left the chat's share at 0.35 of the free space, and the rest stayed empty. When only
+   the chat and plugin panes are in the row, the chat now always grows to fill it. */
+html[data-cskin-pane-w] div[style*="flex-direction: row"]:not(:has(> div > .tiles-shell > [data-tile-host]:not([data-tile-host="chat"]):not([data-tile-host="plugin"]))) > div:has(> .tiles-shell > [data-tile-host="chat"]) {
+  flex-grow: 1 !important; }
+
+/* 2026-10-19: a message cancelled within the Branches send delay comes back as the red "couldn't process" card;
+   tag.js marks it data-cskin-notsent and it shows as a small grey "Not sent" instead. */
+[data-cskin-notsent] > * { display: none !important; }
+[data-cskin-notsent]::before { content: "Not sent"; display: block; font-size: 11px; color: hsl(var(--text-500)); padding: 2px var(--chat-column-gutter-start, 24px); }
+
+/* 2026-10-21: app update nested the pane title inside a Toolbar and made the corner row a plain block.
+   Put the A/A size buttons and the toolbar back on one row, and hide the "Branches" title again. */
+[data-tile-host="plugin"] [data-pane-root] > [data-top-right] { display: flex; align-items: center; }
+[data-tile-host="plugin"] [data-pane-root] > [data-top-right] > [role="toolbar"] { flex: 1 1 auto; min-width: 0; height: 100%; }
+[data-tile-host="plugin"] [data-pane-root] > [data-top-right] [role="toolbar"] span.select-none.truncate { visibility: hidden; }
+[data-tile-host="plugin"] .cskin-pfs { padding-left: 8px; }
+
+/* 2026-10-21: composer buttons in a column once the text is long (tag.js composerStack sets data-cskin-tall) */
+.epitaxy-prompt [data-cskin-tall] div.absolute.bottom-0.right-0 div.flex.items-center.gap-2 { position: relative; }
+.epitaxy-prompt [data-cskin-tall] div.absolute.bottom-0.right-0 div.flex.items-center.gap-2 > .inline-flex:has(> button[aria-label^="Press and hold"]) { position: absolute; right: 0; bottom: calc(100% + 1px); }
+.epitaxy-prompt [data-cskin-tall] [class*="pr-[var(--cmp-trail-w"] { padding-right: 34px !important; }
+.epitaxy-prompt [data-cskin-tall] [class*="max-h-96"]:has(> .ProseMirror) { min-height: 64px !important; }
+.epitaxy-prompt [data-cskin-tall] div.absolute.bottom-0.right-0 div.flex.items-center.gap-2 { transform: translateY(3px); }   /* even gap above mic and below send */
+.epitaxy-prompt [data-cskin-tall] div.absolute.bottom-0.right-0 :is(button[aria-label^="Press and hold"], button[aria-label="Stop"], button[aria-label^="Send"]) { zoom: 0.9; }
+
+/* 2026-10-21: status pills keep full width; pack the thumbnails next to the text instead of at the far right */
+.epitaxy-chat-panel :is([data-cds="TurnStatus"], [data-cds="TurnStatusStep"]) > [data-cds-row] > span[class*="flex-1"][class*="h-0"] { order: 10000; }   /* keep it: the wording picker measures free room through it */
+.epitaxy-chat-panel :is([data-cds="TurnStatus"], [data-cds="TurnStatusStep"]) > [data-cds-row] > span[class*="order-last"][class*="ms-auto"] { margin-inline-start: 0 !important; }
+
+/* 2026-10-22: project name at the top of the colour dot menu */
+#cskin-palette .cskin-p-head { font-size: 12px; font-weight: 600; margin: 0 2px 6px; max-width: 156px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* 2026-10-22: the Mark as read button opens a row menu to pick "Mark as completed": keep that menu invisible */
+html[data-cskin-silentmenu] [data-base-ui-portal]:has([role=menu]), html[data-cskin-silentmenu] [role=menu] { opacity: 0 !important; }

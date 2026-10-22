@@ -107,6 +107,14 @@ I wanted to use every bit of the screen and get more done. So I started tinkerin
 - **A clearer selected session**, with a darker background and an accent edge.
 - **Less clutter.** The New, Artifacts and Customize items, the Back and Forward buttons, and the "..." button that appears on hover are hidden. Search becomes a small magnifier button in the top bar. Right-click still has every action.
 - **Bold session names.** You can delete one block in `skin.css` if you prefer the normal weight.
+- **Your own session order.** Claude sorts the sessions in a project by itself. The colour menu has an **Order** list where you move sessions up and down, and that order sticks. New sessions show at the top until you place them, and Claude's "Show more" row stays at the bottom.
+- **A clearer colour menu.** It shows the project's name at the top, and every project box gets a faint edge in its own colour (grey for projects without one), in light and dark mode.
+- **Busy projects open by themselves.** A collapsed project unfolds while one of its sessions is working, waiting for you or has an unread reply, and folds back once it's quiet.
+- **Unread stays unread.** Claude marks a session read the moment you open it. The skin keeps a blue dot on a session whose reply arrived while you were elsewhere, and on one where you didn't scroll, switch or reply within 30 seconds of the answer. It stays until you press **Mark as read** (under the last reply), send a message there, or pick "Mark as read" from the session's right-click menu.
+- **One button for everything.** On a session with Claude's orange "needs input" or red "failed" dot, the same **Mark as read** button also does Claude's own "Mark as completed", so one click clears the session.
+- **A New session ＋ button** next to search, since the sidebar's own New row is out of sight in this layout.
+- **No hover pop-ups** on session rows (the name tooltip and the large "Claude asked" card). Right-click still has every action.
+- **Text that follows the width.** The narrower you drag the sidebar or a side pane, the smaller its text gets, within the range you set with the A / A buttons.
 
 ### Chat
 
@@ -119,6 +127,14 @@ I wanted to use every bit of the screen and get more done. So I started tinkerin
 - **Smaller tool lines** ("Ran 4 commands") and a smaller working status line, with less empty space around them.
 - **Escape no longer stops a reply by accident.** In Claude, pressing Escape while a reply is running stops it, even when you only meant to close Cmd+F search. The skin ignores a single Escape while a reply runs. Menus and dialogs still close with Escape, and pressing Escape twice quickly still stops the reply when you mean it.
 - **A "more below" cue.** While you're scrolled up, the message box has a soft orange glow, so you can tell at a glance that the chat continues below. It goes away once you reach the end. `skin.css` also has two other styles, a thin line along the top of the box and a small notch above it.
+- **Status lines as small grey pills.** "Ran 3 commands", "Found ..." and similar lines are smaller and sit in a light grey pill, with their thumbnails right after the text, so they read apart from real messages.
+- **A line at the end of each reply,** under the copy / pin / time buttons, so you can see where one reply ends while scrolling.
+- **The message box text** is two pixels smaller than the replies, and the placeholder and cursor line up.
+- **Send and mic stack when you write a lot.** Once your text wraps to a second line, the mic moves above the send button, so the end of your text never runs underneath them. It goes back to normal when the box is short again.
+- **A read-aloud player.** When Claude reads a message aloud, a small floating player gives you pause / play, back and forward 5 seconds, and speed.
+- **Day dots on the weekly usage bar.** In the usage panel (the circle at the top right), the Weekly bar gets six dots that split it into the seven days of your usage week, and today's day is shaded. The shading moves to the next day at midnight. A dot turns solid once your usage has passed it, so you can see if you are ahead of or behind an even pace.
+- **The question card** Claude shows when it asks you to choose gets a calmer look, and the summary card of answered questions gets a grey fill so it stands out when scrolling.
+- **The side chat** (a session open in the right-hand pane) uses smaller text than the main chat.
 
 ### Mod panes
 
@@ -127,6 +143,9 @@ If you use [Claude Code mods](https://code.claude.com/docs/en/plugins/mods/overv
 - **Show or hide a mod's side pane without closing it.** Use the button in the chat's top bar, next to ⋮, or press **Option+Cmd+B**, the mirror of Claude's own Cmd+B for the left sidebar. When hidden, the chat gets its full width back and the mod keeps running.
 - **Drag the pane narrower.** Claude stops it at 280px; the skin lets it go down to 160px, and remembers the width. Double-click the edge to reset it.
 - **Compact mod boxes.** Smaller text, buttons and padding in mod panes, and a slimmer button row above the message box.
+- **Text size for mod panes.** Small **A / A** buttons in the pane's top corner, like the sidebar's.
+- **The iOS Simulator panel can be resized.** Claude locks the divider between the chat and the simulator; the skin gives you a drag handle and remembers the width.
+- **If you use my Branches task tree mod** (not published yet), its counts of overdue tasks and tasks that need you show as symbols in the chat's top bar, and its notes can have line breaks. A message you cancel during its 5-second send delay shows as a grey "Not sent" line instead of Claude's red error card. Without the mod, these parts simply do nothing.
 
 ### Optional
 
@@ -139,7 +158,7 @@ The Windows app is built from the same code, so the skin should work the same wa
 ## Make it your own
 
 - **`skin.css`** holds all the looks: sizes, spacing, colours, what is hidden. Every block has a comment saying what it does.
-- **`skin-ui.js`** holds the parts you click: the colour menu, tags, collapse arrows, the text size buttons and the resize handle.
+- **`skin-ui.js`** holds the parts you click and everything that reacts to the app: the colour menu, tags, session order, collapse arrows, unread dots, the text size buttons, the resize handles and the usage dots.
 - **`skin-config.json`** holds two settings: `rightColumnStartsAt` (a project name, or empty to split the columns evenly) and `blockControlTab`.
 
 After editing, run `python3 build.py` to rebuild `apply.js`, then paste it again. The Mac script rebuilds it for you each time it runs.
@@ -149,7 +168,7 @@ To find what to change, open the console's **Elements** tab and point at any par
 ## Remove it or start over
 
 - **Remove the skin:** quit and reopen Claude (and turn off any automatic apply).
-- **Reset all your choices:** paste `localStorage.removeItem('claudeSkin')` into the console, then reapply.
+- **Reset all your choices:** paste `localStorage.removeItem('claudeSkin')` into the console, then reapply. To clear the skin's unread dots too, also paste `localStorage.removeItem('claudeSkinUnread')`.
 
 ## Good to know
 
