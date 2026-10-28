@@ -56,8 +56,20 @@ const addSearchButton = () => {
   if (!tb || tb.querySelector('.cskin-search')) return;
   const b = document.createElement('button'); b.className = 'cskin-search'; b.title = 'Search (⌘K)';
   b.innerHTML = '<svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="7" cy="7" r="4.5"/><path d="m10.5 10.5 3 3"/></svg>';
-  b.addEventListener('click', e => { e.stopPropagation(); document.querySelector('aside .df-search-field')?.click(); });
+  // 2026-10-23: the sidebar's search box is gone and the app's own Search row doesn't always open; the magnifier sends
+  // the same ⌘K that always works (pressing it again closes search)
+  b.addEventListener('click', e => { e.stopPropagation(); const o = { key: 'k', code: 'KeyK', keyCode: 75, which: 75, metaKey: true, bubbles: true, cancelable: true, composed: true };
+    document.body.dispatchEvent(new KeyboardEvent('keydown', o)); document.body.dispatchEvent(new KeyboardEvent('keyup', o)); });
   tb.append(b);
+};
+// --- Scheduled: the app's "Scheduled" row (routines page) was squished at the top of the sidebar, so it is hidden and
+// a clock in the top bar, right of search, presses it instead (asked 2026-10-23; the row never carried a warning dot)
+const addSchedButton = () => {
+  const tb = document.querySelector('aside.dframe-sidebar > .df-titlebar'); if (!tb || tb.querySelector('.cskin-sched')) return;
+  const b = document.createElement('button'); b.className = 'cskin-sched'; b.title = 'Scheduled tasks';
+  b.innerHTML = '<svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="8" r="5.5"/><path d="M8 5v3l2 1.5"/></svg>';
+  b.addEventListener('click', e => { e.stopPropagation(); document.querySelector('aside [data-nav-item="scheduled"]')?.click(); });
+  const at = tb.querySelector('.cskin-search'); at ? at.after(b) : tb.append(b);
 };
 // --- Our own sidebar resize handle: the app won't go below 242 px. Drag the sidebar's right edge;
 // width is kept between 170 and 600 px and remembered (localStorage claudeSkin.sidebarW).
@@ -145,7 +157,7 @@ const tagSection = name => {
 // --- Text size follows the panel's width: the narrower the sidebar or side pane, the smaller the text.
 // Each panel has points (width in px, size in px); between them the size is drawn on a straight line, past the
 // last one the line carries on, up to 11 px. The A / A buttons nudge it up or down from there (claudeSkin.fontOffset,
-// claudeSkin.paneFontOffset). Points agreed with Cskin 2026-10-04: narrowest = 9, the width he uses = 10.
+// claudeSkin.paneFontOffset). Points agreed with the author 2026-10-04: narrowest = 9, the width he uses = 10.
 const SIDE_FONT_POINTS = [[170, 9], [208, 10]];
 const PANE_FONT_POINTS = [[160, 9], [245, 10]];
 const AUTO_FONT_MAX = 11;   // following the width never goes past 11; the A buttons can
@@ -199,7 +211,7 @@ const uSave = u => { try { localStorage.setItem('claudeSkinUnread', JSON.stringi
 // a session's visible name: since the 2026-10-14 update the label also holds hidden screen-reader words
 // ("Forked from …", "Running"), which must not end up in names
 const labelText = l => { if (!l) return ''; let t = ''; const w = document.createTreeWalker(l, NodeFilter.SHOW_TEXT);
-  for (let n; (n = w.nextNode());) if (!n.parentElement.closest('.sr-only')) t += n.textContent; return t.trim(); };
+  for (let n; (n = w.nextNode());) if (!n.parentElement.closest('.sr-only, [data-cds-shimmer-clone]')) t += n.textContent; return t.trim(); };   // 2026-10-23: the shimmer adds a hidden copy of the name
 const rowName = r => labelText(r.querySelector('.dframe-fade-label'));
 // 2026-10-21: the unread list is keyed by the session's fixed id (data-row-key on an ancestor), not its name,
 // because a renamed session (a session renamed from A to B) lost its dot. Old name entries are converted on sight.
@@ -223,7 +235,7 @@ const placeReadButton = (cur, show) => {
 };
 // orange (needs input) or red (failed): since the 2026-10-22 update only the app's "Mark as completed" clears these.
 // The skin's button does that too: it opens the row's menu out of sight and picks the item (2026-10-22).
-const rowState = r => r?.querySelector('[role=img][aria-label]')?.getAttribute('aria-label') || 'Idle';
+const rowState = r => r?.querySelector('[data-attention="working"]') ? 'Running' : r?.querySelector('[role=img][aria-label]')?.getAttribute('aria-label') || 'Idle';   // 2026-10-23: running = data-attention=working, no dot
 const needsDone = r => !['Idle', 'Running', 'Unread response'].includes(rowState(r));
 const completeRow = row => {
   const html = document.documentElement; html.setAttribute('data-cskin-silentmenu', '');
@@ -249,7 +261,7 @@ const syncUnread = () => {
   for (const r of document.querySelectorAll('aside [data-row]')) {
     // since the 2026-10-14 update an idle session has no status mark at all, so no mark means Idle
     const st = r.querySelector('[role=status][aria-label], [role=img][aria-label]'); if (!rowName(r)) continue; const n = rowKey(r);
-    const s = st ? st.getAttribute('aria-label') : 'Idle', prev = window.__cskinPrev[n]; window.__cskinPrev[n] = s;
+    const s = r.querySelector('[data-attention="working"]') ? 'Running' : st ? st.getAttribute('aria-label') : 'Idle', prev = window.__cskinPrev[n]; window.__cskinPrev[n] = s;
     // orange "Awaiting input" is NOT saved: since the 2026-10-22 update the app keeps it lit until you answer or use
     // its own "Mark as completed" (saving it here made a blue dot appear right after that)
     if (s === 'Unread response') addUnread(n);                                              // case 1 (Claude's own unread)
@@ -262,7 +274,7 @@ const syncUnread = () => {
   const u = uLoad();
   for (const r of document.querySelectorAll('aside [data-row]')) {
     // shown while the session is idle: the old idle ring, or (since the update) no status mark at all
-    const busy = r.querySelector('[role=img][aria-label]:not([aria-label="Idle"])'); const show = !busy && u.has(rowKey(r));
+    const busy = r.querySelector('[role=img][aria-label]:not([aria-label="Idle"]), [data-attention="working"]'); const show = !busy && u.has(rowKey(r));
     if (show !== r.hasAttribute('data-cskin-unread')) r.toggleAttribute('data-cskin-unread', show);
   }
   const curRow = document.querySelector('aside [data-row][data-selected="focused"]');
@@ -372,6 +384,105 @@ const addNewButton = () => {
   b.addEventListener('click', e => { e.stopPropagation(); appNewButton()?.click(); });
   const at = tb.querySelector('.cskin-search'); at ? at.before(b) : tb.append(b);
 };
+// --- Rolling names (asked 2026-10-25): rest the pointer on a session whose name is cut off and, after a short wait,
+// the name slides left until its end shows, then stays there. Leaving the row slides it back. Names that fit never move.
+// Pop-ups stay off (removed 2026-10-15). Tuning: ROLL_WAIT (ms before it starts), ROLL_SPEED (px per second).
+const ROLL_WAIT = 550, ROLL_SPEED = 34;   // 34 px/s: 55 was a little too fast (2026-10-25)
+if (window.__cskinRoll) { document.removeEventListener('pointerover', window.__cskinRoll.over, true); document.removeEventListener('pointerout', window.__cskinRoll.out, true); window.__cskinRoll.stop?.(); }
+{
+  const st = { lbl: null, timer: 0 };   // each name keeps its own animation (l.__raf): one shared one let a quick sweep cancel a slide-back, leaving names stuck at the end
+  const mask = (l, v) => { if (v) { l.style.setProperty('-webkit-mask-image', v, 'important'); l.style.setProperty('mask-image', v, 'important'); }
+    else { l.style.removeProperty('-webkit-mask-image'); l.style.removeProperty('mask-image'); } };
+  const slide = (l, to, ms, done) => {          // eased slide of the label's own scroll position
+    cancelAnimationFrame(l.__raf); const from = l.scrollLeft, t0 = performance.now();
+    const step = now => { const k = Math.min(1, (now - t0) / ms), e = k < .5 ? 2 * k * k : 1 - (-2 * k + 2) ** 2 / 2;
+      l.scrollLeft = from + (to - from) * e; if (k < 1) l.__raf = requestAnimationFrame(step); else { l.__raf = 0; done?.(); } };
+    l.__raf = requestAnimationFrame(step);
+  };
+  const stop = () => { clearTimeout(st.timer); const l = st.lbl; st.lbl = null; if (!l) return;
+    if (l.scrollLeft > 0) slide(l, 0, 260, () => mask(l)); else { cancelAnimationFrame(l.__raf); mask(l); }
+    // safety net: any other name still pushed along (a missed pointer event) snaps back
+    for (const o of document.querySelectorAll('aside.dframe-sidebar [data-row] .dframe-fade-label')) if (o !== l && o.scrollLeft > 0 && !o.__raf) { o.scrollLeft = 0; mask(o); } };
+  const over = e => {
+    const row = e.target.closest?.('aside.dframe-sidebar [data-row]'); const l = row?.querySelector('.dframe-fade-label');
+    if (l === st.lbl) return;
+    stop(); if (!l) return;
+    st.lbl = l;
+    st.timer = setTimeout(() => {
+      if (st.lbl !== l) return; const dist = l.scrollWidth - l.clientWidth; if (dist < 4) return;
+      mask(l, 'linear-gradient(to right, transparent 0, #000 14px, #000 calc(100% - 14px), transparent 100%)');
+      slide(l, dist, Math.min(6000, Math.max(900, dist / ROLL_SPEED * 1000)), () => { if (st.lbl === l) mask(l, 'linear-gradient(to right, transparent 0, #000 14px)'); });
+    }, ROLL_WAIT);
+  };
+  const out = e => { if (st.lbl && !e.relatedTarget?.closest?.('aside.dframe-sidebar [data-row]')) stop(); };
+  document.addEventListener('pointerover', over, true); document.addEventListener('pointerout', out, true);
+  window.__cskinRoll = { over, out, stop };
+}
+// --- Fade length per cut-off name (2026-10-25): the overflow plus 6px, at most 14px (skin.css reads --cskin-fade;
+// was plus 8, at most 24, shortened 2026-10-26 when the dots moved to the far right)
+clearInterval(window.__cskinFadeIv);
+window.__cskinFadeIv = setInterval(() => {
+  for (const l of document.querySelectorAll('aside.dframe-sidebar [data-row] .dframe-fade-label[data-overflowing]')) {
+    if (!l.offsetParent || l.scrollLeft > 0) continue;
+    const v = Math.min(14, Math.max(6, l.scrollWidth - l.clientWidth + 6)) + 'px';
+    if (l.style.getPropertyValue('--cskin-fade') !== v) l.style.setProperty('--cskin-fade', v);
+  }
+}, 700);
+// --- Cache clock (2026-10-25): the Branches mod draws it as the band above the message box (a mod cannot draw in the
+// row under the box). The skin lifts that band into the empty space of the row under the box, ending just left of
+// the model picker (or of a status chip the app shows there), centred on the row. Where the space is too narrow it
+// stays where the mod drew it, above the box. Found by its bar's alt text, so other bands are left alone.
+const CC_CSS = `
+div:has(> div > img[alt="Cache time left"]) { --cds-font-size-body: 12px; font-size: 12px; line-height: 16px;
+  background: #8080801a; border-radius: 999px; padding: 2px 6px 2px 11px; column-gap: 8px !important; }
+div:has(> img[alt="Cache time left"]) { column-gap: 7px !important; }
+div:has(> img[alt^="Keep"]) { margin-left: 0 !important; padding-left: 8px; border-left: 1px solid #80808038; }
+div:has(> div > img[alt="Cache time left"]) span { font-size: 12px; }
+div:has(> img[alt^="Keep"]) > button { padding: 0 3px !important; margin-left: 2px; min-height: 0 !important; height: 18px; color: var(--cds-text-secondary) !important; background: none !important; box-shadow: none !important; }
+div:has(> img[alt^="Keep"]) > button span { color: inherit !important; font-size: 12px !important; }
+div:has(> img[alt^="Keep"]) > button:hover { color: var(--cds-text-primary) !important; }
+div:has(> img[alt="Keeping warm"]) > button, div:has(> img[alt="Keeping warm"]) > button:hover { color: #e8833a !important; }
+`;
+clearInterval(window.__cskinCcIv);
+window.__cskinCcIv = setInterval(() => {
+  for (const site of document.querySelectorAll('[data-engine-site="AbovePrompt"]')) {
+    const host = site.querySelector('[data-plugin-drawn="AbovePrompt"]');
+    // the band's frame (the rounded grey box holding it) is what moves; in the row it loses its padding and grey
+    const frame = site.parentElement; if (!frame) continue;
+    // an earlier version (same day) moved the band itself; undo that once
+    if (site.hasAttribute('data-cskin-cc')) { site.removeAttribute('data-cskin-cc'); for (const k of ['position', 'left', 'top', 'width', 'margin', 'padding', 'z-index']) site.style.removeProperty(k); }
+    const drop = () => { if (!frame.hasAttribute('data-cskin-cc')) return; frame.removeAttribute('data-cskin-cc'); for (const k of ['position', 'left', 'top', 'right', 'bottom', 'width', 'min-height', 'margin', 'padding', 'background', 'z-index']) frame.style.removeProperty(k); };
+    if (!host?.shadowRoot?.querySelector('img[alt="Cache time left"]') || frame.children.length !== 1) { drop(); continue; }
+    // its look inside the band (sealed from page CSS): the row's own size and grey; Keep warm grey, orange when on
+    let st = host.shadowRoot.getElementById('cskin-cc-style');
+    if (!st) { st = document.createElement('style'); st.id = 'cskin-cc-style'; host.shadowRoot.append(st); }
+    if (st.textContent !== CC_CSS) st.textContent = CC_CSS;
+    // the row under this message box: the model picker's group, the empty space before it, "Bypass permissions"
+    let box = frame.parentElement, model = null;
+    while (box && !(model = box.querySelector('[data-testid="epitaxy-cds-model-selector"]'))) box = box.parentElement;
+    const right = model?.closest('.ms-auto'), slot = right?.previousElementSibling, lead = slot?.previousElementSibling;
+    if (!right || !slot || !lead) { drop(); continue; }
+    const rr = right.getBoundingClientRect(), lr = lead.getBoundingClientRect();
+    if (!rr.width || !lr.width) { drop(); continue; }
+    let end = rr.left;
+    for (const c of slot.querySelectorAll('[data-engine-status-chip]')) { const r = c.getBoundingClientRect(); if (r.width) end = Math.min(end, r.left); }
+    // pinned (absolute) to the bottom-right corner of the box that holds both the message box and the row under it,
+    // so it moves with that row in the same frame as the message box grows or shrinks; no timer lag (2026-10-26:
+    // the earlier fixed position followed only every 300 ms, so it jumped on each new or deleted line)
+    if (!frame.hasAttribute('data-cskin-cc') || frame.style.position !== 'absolute') {
+      frame.setAttribute('data-cskin-cc', '');
+      frame.style.removeProperty('left'); frame.style.removeProperty('top');
+      for (const [k, v] of [['position', 'absolute'], ['right', '0px'], ['bottom', '0px'], ['width', 'max-content'], ['min-height', '0'], ['margin', '0'], ['padding', '0'], ['background', 'none'], ['z-index', '5']]) frame.style.setProperty(k, v, 'important');
+    }
+    const cb = frame.offsetParent; if (!cb) { drop(); continue; }
+    const br = cb.getBoundingClientRect(), cr = frame.getBoundingClientRect();
+    const x = end - 14 - cr.width, y = (rr.top + rr.bottom) / 2 - cr.height / 2;
+    if (x < lr.right + 10) { drop(); continue; }
+    const Rt = Math.round(br.right - (end - 14)) + 'px', Bt = Math.round(br.bottom - (y + cr.height)) + 'px';
+    if (frame.style.right !== Rt) frame.style.setProperty('right', Rt, 'important');
+    if (frame.style.bottom !== Bt) frame.style.setProperty('bottom', Bt, 'important');
+  }
+}, 300);
 if (window.__cskinPaneKey) window.removeEventListener('keydown', window.__cskinPaneKey, true);
 // Closed with its ✕ the pane is gone, not hidden, so the key has nothing to show. Then it sends /branches (the mod's
 // own reopen command), but only into an EMPTY message box, so a draft is never touched (asked 2026-10-18).
@@ -673,12 +784,18 @@ window.addEventListener('dblclick', window.__cskinSimReset, true);
 // with up/down buttons; the order is kept per project (localStorage claudeSkin.sessOrder, by the
 // session's permanent key, so renames don't lose it). Sessions not yet placed (new ones) show first.
 const sessionWraps = blk => [...blk.querySelectorAll('[class*="group/section"] > .contents > .df-drag-shiftable')].filter(w => w.querySelector('[data-row] .dframe-fade-label'));   // the Show more/less row also has data-row
-const visualOrder = blk => sessionWraps(blk).map((w, i) => ({ w, i, o: +(w.style.order || 0) })).sort((a, b) => a.o - b.o || a.i - b.i).map(x => x.w.getAttribute('data-row-key'));
-const moveSession = (blk, key, d) => {
-  const keys = visualOrder(blk), i = keys.indexOf(key), j = i + d; if (i < 0 || j < 0 || j >= keys.length) return;
+const visualOrderOf = wraps => wraps.map((w, i) => ({ w, i, o: +(w.style.order || 0) })).sort((a, b) => a.o - b.o || a.i - b.i).map(x => x.w.getAttribute('data-row-key'));
+const visualOrder = blk => visualOrderOf(sessionWraps(blk));
+// nested sessions (2026-10-26): each parent's box of nested chats, ordered on its own and stored under "<project> > <parent key>"
+const nestBoxes = blk => [...blk.querySelectorAll('[class*="group/section"] > .contents > .df-accordion-guide')].map(g => ({ g, pk: g.previousElementSibling?.getAttribute('data-row-key') })).filter(x => x.pk);
+const nestWraps = g => [...g.children].filter(w => w.classList.contains('df-drag-shiftable') && w.getAttribute('data-row-key') && w.querySelector('[data-row] .dframe-fade-label'));
+const nestStoreKey = (blk, pk) => blk.dataset.cskinProject + ' > ' + pk;
+const moveIn = (keys, storeKey, key, d) => {
+  const i = keys.indexOf(key), j = i + d; if (i < 0 || j < 0 || j >= keys.length) return;
   [keys[i], keys[j]] = [keys[j], keys[i]];
-  const s = load(); s.sessOrder = s.sessOrder || {}; s.sessOrder[blk.dataset.cskinProject] = keys; save(s); applySessionOrder();
+  const s = load(); s.sessOrder = s.sessOrder || {}; s.sessOrder[storeKey] = keys; save(s); applySessionOrder();
 };
+const moveSession = (blk, key, d) => moveIn(visualOrder(blk), blk.dataset.cskinProject, key, d);
 const applySessionOrder = () => {
   const ord = load().sessOrder || {};
   for (const blk of document.querySelectorAll('[data-cskin-project]')) {
@@ -686,6 +803,16 @@ const applySessionOrder = () => {
     for (const w of sessionWraps(blk)) {
       const i = list ? list.indexOf(w.getAttribute('data-row-key')) : -1, v = list && i >= 0 ? String(i + 1) : '';
       if (w.style.order !== v) w.style.order = v;
+    }
+    // nested sessions (2026-10-23) sit in a box after their parent's slot: same order as the parent, so they stay under it
+    for (const g of blk.querySelectorAll('[class*="group/section"] > .contents > .df-accordion-guide')) { const v = g.previousElementSibling?.style.order || ''; if (g.style.order !== v) g.style.order = v; }
+    for (const { g, pk } of nestBoxes(blk)) {
+      const nl = ord[nestStoreKey(blk, pk)];
+      for (const w of nestWraps(g)) { const i = nl ? nl.indexOf(w.getAttribute('data-row-key')) : -1, v = nl && i >= 0 ? String(i + 1) : ''; if (w.style.order !== v) w.style.order = v; }
+    }
+    for (const g of blk.querySelectorAll('.df-accordion-guide')) {   // the sidebar's tree line ends in a curve on the nested chat shown last
+      const last = visualOrderOf(nestWraps(g)).pop();
+      for (const w of g.children) { const on = !!last && w.getAttribute('data-row-key') === last; if (w.hasAttribute('data-cskin-nest-last') !== on) w.toggleAttribute('data-cskin-nest-last', on); }
     }
     // the app's own "Show more / Show less" row (2026-10-22) is not a session: keep it at the bottom
     for (const w of blk.querySelectorAll('[class*="group/section"] > .contents > .df-drag-shiftable')) if (!w.querySelector('.dframe-fade-label') && /^show (more|less)/i.test(w.textContent.trim()) && w.style.order !== '99999') w.style.order = '99999';
@@ -696,22 +823,29 @@ const applySessionOrder = () => {
 // The "Order" list in a project's colour menu: its sessions, top to bottom, each with up/down buttons
 const orderSection = name => {
   const blk = [...document.querySelectorAll('[data-cskin-project]')].find(b => b.dataset.cskinProject === name);
-  if (!blk || sessionWraps(blk).length < 2) return null;
+  if (!blk) return null;
+  const boxes = () => new Map(nestBoxes(blk).map(x => [x.pk, x.g]));
+  if (sessionWraps(blk).length < 2 && ![...boxes().values()].some(g => nestWraps(g).length > 1)) return null;
   const sec = document.createElement('div'); sec.className = 'cskin-order';
+  const addRow = (w, i, n, onMove, nested) => {
+    const row = document.createElement('div'); row.className = 'cskin-order-row' + (nested ? ' cskin-order-nested' : '');
+    const t = document.createElement('span'); t.className = 'cskin-order-name'; t.textContent = labelText(w?.querySelector('.dframe-fade-label')); row.append(t);
+    for (const [gl, d] of [['▲', -1], ['▼', 1]]) {
+      const b = document.createElement('button'); b.textContent = gl; b.title = d < 0 ? 'Move up' : 'Move down';
+      if ((d < 0 && i === 0) || (d > 0 && i === n - 1)) b.disabled = true;
+      b.onclick = e => { e.stopPropagation(); onMove(d); render(); };
+      row.append(b);
+    }
+    sec.append(row);
+  };
   const render = () => {
     sec.innerHTML = '<div class="cskin-order-h">Order</div>';
-    const keys = visualOrder(blk), byKey = new Map(sessionWraps(blk).map(w => [w.getAttribute('data-row-key'), w]));
+    const keys = visualOrder(blk), byKey = new Map(sessionWraps(blk).map(w => [w.getAttribute('data-row-key'), w])), bx = boxes();
     keys.forEach((k, i) => {
-      const w = byKey.get(k); const label = labelText(w?.querySelector('.dframe-fade-label'));
-      const row = document.createElement('div'); row.className = 'cskin-order-row';
-      const t = document.createElement('span'); t.className = 'cskin-order-name'; t.textContent = label; row.append(t);
-      for (const [g, d] of [['▲', -1], ['▼', 1]]) {
-        const b = document.createElement('button'); b.textContent = g; b.title = d < 0 ? 'Move up' : 'Move down';
-        if ((d < 0 && i === 0) || (d > 0 && i === keys.length - 1)) b.disabled = true;
-        b.onclick = e => { e.stopPropagation(); moveSession(blk, k, d); render(); };
-        row.append(b);
-      }
-      sec.append(row);
+      addRow(byKey.get(k), i, keys.length, d => moveSession(blk, k, d), false);
+      const g = bx.get(k); if (!g) return;
+      const ck = visualOrderOf(nestWraps(g)), cw = new Map(nestWraps(g).map(w => [w.getAttribute('data-row-key'), w]));
+      ck.forEach((c, j) => addRow(cw.get(c), j, ck.length, d => moveIn(visualOrderOf(nestWraps(g)), nestStoreKey(blk, k), c, d), true));
     });
   };
   render();
@@ -794,7 +928,7 @@ const markNotSent = () => {
 // It switches back only with a 12px gap, so the box does not flicker at the edge.
 const composerStack = () => {
   for (const pm of document.querySelectorAll('.epitaxy-prompt .ProseMirror')) {
-    const shell = pm.closest('[class*="bg-surface-3"]'), grp = shell?.querySelector('div.absolute.bottom-0.right-0'); if (!grp) continue;
+    const shell = pm.closest('[class*="bg-surface-3"]'), grp = shell?.querySelector('div.absolute.bottom-0.right-0, div.absolute.bottom-0.end-0'); if (!grp) continue;
     // count the text's own lines (the box itself stretches in tall mode, so its height can't be used)
     const tops = new Set(); let right = 0; const w = document.createTreeWalker(pm, NodeFilter.SHOW_TEXT);
     for (let t; (t = w.nextNode());) { if (!t.textContent.trim()) continue; const r = document.createRange(); r.selectNodeContents(t);
@@ -816,11 +950,17 @@ const pillWidths = () => {
   }
 };
 const tagAll = () => {
+  // 2026-10-23: no sections (the author). The session menu's "Move to section" item is hidden whenever a menu opens
+  for (const it of document.querySelectorAll('[role=menu] [role^=menuitem]')) if (!it.dataset.cskinNosec && /^move to section/i.test(it.textContent.trim())) { it.dataset.cskinNosec = '1'; it.style.display = 'none'; }
+  // 2026-10-23: no nested sessions. A parent folded with the (now hidden) arrow is unfolded once, so its nested
+  // session shows as a normal row again
+  for (const t of document.querySelectorAll('aside [data-container-icon][aria-expanded="false"]')) { if (!t.__cskinOpened) { t.__cskinOpened = 1; t.click(); } }
   try { pillWidths(); } catch {}
   try { composerStack(); } catch {}
   try { usageDots(); } catch {}
   try { markNotSent(); } catch {}
   addSearchButton();
+  addSchedButton();
   addFontControl();
   applyFont();
   applySidebarWidth();
@@ -848,7 +988,7 @@ const tagAll = () => {
     // a folded project opens by itself while one of its sessions is busy or wants you: working, unread (Claude's own
     // or the sticky one) or waiting; the app marks every non-idle state with role=status. It folds back once the
     // session is idle and read (asked 2026-10-09, working added 2026-10-14)
-    const unread = !!block.querySelector('[data-row][data-cskin-unread], [data-row] [role=status][aria-label], [data-row] [role=img][aria-label]:not([aria-label="Idle"])');
+    const unread = !!block.querySelector('[data-row][data-cskin-unread], [data-row] [role=status][aria-label], [data-row] [role=img][aria-label]:not([aria-label="Idle"]), [data-row] [data-attention]');   // data-attention (working/waiting/unread): 2026-10-23 update, running has no dot any more
     const fold = (st.folded || []).includes(name) && !unread;
     if (fold && !block.dataset.cskinFolded) block.dataset.cskinFolded = '1';
     if (!fold && block.dataset.cskinFolded) delete block.dataset.cskinFolded;
@@ -953,7 +1093,7 @@ document.addEventListener('click', window.__cskinClick, true);
 // way somewhere else doesn't open it) and closes 0.6 s after the pointer leaves (a small slip doesn't close it).
 // skin.css draws data-cskin-peek. A project just collapsed with its arrow (data-cskin-nopeek) waits until the pointer leaves.
 if (window.__cskinPeekOver) { document.removeEventListener('pointerover', window.__cskinPeekOver, true); document.removeEventListener('pointerout', window.__cskinPeekOut, true); }
-const PEEK_OPEN = 180, PEEK_CLOSE = 300;
+const PEEK_OPEN = 550, PEEK_CLOSE = 300;   // 550: hovering past a folded project no longer pops it open (asked 2026-10-25; was 180)
 const peekBlock = t => t?.closest?.('.df-recents-anchor > [data-cskin-folded]');
 window.__cskinPeekOver = e => {
   const b = peekBlock(e.target); if (!b) return;
@@ -1166,7 +1306,7 @@ document.addEventListener('input', window.__cskinCaretNudge, true);
 document.addEventListener('keyup', window.__cskinCaretNudge, true);
 
 if (window.__cskinObs) window.__cskinObs.disconnect();
-document.querySelectorAll('.cskin-tts, .cskin-swatch, .cskin-chev, .cskin-search, .cskin-resize, .cskin-fs, .cskin-tags, .cskin-pane-toggle, .cskin-hint, .cskin-sord, .cskin-pfs, .cskin-bsum, .cskin-new').forEach(e => e.remove());
+document.querySelectorAll('.cskin-tts, .cskin-swatch, .cskin-chev, .cskin-search, .cskin-sched, .cskin-resize, .cskin-fs, .cskin-tags, .cskin-pane-toggle, .cskin-hint, .cskin-sord, .cskin-pfs, .cskin-bsum, .cskin-new').forEach(e => e.remove());
 document.querySelectorAll('[data-cskin-click]').forEach(e => delete e.dataset.cskinClick);   // remove old dots so new ones get the current palette code
 let queued = false;
 window.__cskinObs = new MutationObserver(() => { extendViewMenu(); if (!queued) { queued = true; requestAnimationFrame(() => { queued = false; tagAll(); }); } });

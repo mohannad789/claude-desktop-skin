@@ -19,6 +19,13 @@ tell application "System Events"
       set value of attribute "AXMain" of w to true
       set opened to false
     else
+      -- 2026-10-25: there may be a second Claude window; always open DevTools on the main one (named "Claude")
+      if exists window "Claude" then
+        perform action "AXRaise" of window "Claude"
+        set value of attribute "AXMain" of window "Claude" to true
+        set value of attribute "AXFocused" of window "Claude" to true
+        delay 0.3
+      end if
       keystroke "i" using {command down, option down}
       set opened to true
     end if

@@ -116,6 +116,12 @@ I wanted to use every bit of the screen and get more done. So I started tinkerin
 - **A New session ＋ button** next to search, since the sidebar's own New row is out of sight in this layout.
 - **No hover pop-ups** on session rows (the name tooltip and the large "Claude asked" card). Right-click still has every action.
 - **Text that follows the width.** The narrower you drag the sidebar or a side pane, the smaller its text gets, within the range you set with the A / A buttons.
+- **Nested sessions as a small tree.** A session started from another one sits under it, moved in only a few pixels, with a thin grey line and a rounded branch to each one. The colour menu's **Order** list shows them under their parent, and they move up and down among themselves.
+- **Every status dot in the same place.** The app's own dots and the skin's unread and running dots all line up at the right of the row, and names run right up to the dot with only a short fade when they are cut off.
+- **Long names roll.** Rest the pointer on a session whose name is cut off and, after a moment, the name slides along so you can read the end of it. Moving away slides it back.
+- **Running sessions keep a dot.** Claude now only shimmers the name of a working session, on and off. The skin adds a softly pulsing grey dot, so you can always see it is running. Unread is blue and waiting for you is orange again.
+- **Scheduled is a clock button** in the top bar, next to search, instead of a row squeezed in at the top of the list.
+- **Collapsed projects open only when you mean it.** Hovering over a collapsed project opens it after half a second, so moving the pointer past one no longer pops it open.
 
 ### Chat
 
@@ -136,6 +142,8 @@ I wanted to use every bit of the screen and get more done. So I started tinkerin
 - **Day dots on the weekly usage bar.** In the usage panel (the circle at the top right), the Weekly bar gets six dots that split it into the seven days of your usage week, and today's day is shaded. The shading moves to the next day at midnight. A dot turns solid once your usage has passed it, so you can see if you are ahead of or behind an even pace.
 - **The question card** Claude shows when it asks you to choose gets a calmer look, and the summary card of answered questions gets a grey fill so it stands out when scrolling.
 - **The side chat** (a session open in the right-hand pane) uses smaller text than the main chat.
+- **Compact question cards.** When every answer is a word or two, the answers sit side by side as small pills. Answers with a description keep their rows, just tighter.
+- **No orange "Needs your input" label** in the status line under the chat. The orange dot in the sidebar already says it.
 
 ### Mod panes
 

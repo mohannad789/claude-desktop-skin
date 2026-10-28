@@ -42,7 +42,8 @@ aside.dframe-sidebar { --df-row-px: 1px; --df-row-gap: 2px; }
 
 /* Hide the top items: New, Artifacts, Routines, Customize (Search stays) */
 aside.dframe-sidebar .static-composer-boot-fade > .shrink-0 > .contents { display: none !important; }   /* New */
-aside.dframe-sidebar [data-testid="nav-pin-rows"] { display: none !important; }                          /* Artifacts, Routines, Customize */
+/* Artifacts, Customize and Scheduled rows hidden; Scheduled is a clock button in the top bar (.cskin-sched) since 2026-10-23 */
+aside.dframe-sidebar [data-testid="nav-pin-rows"] { display: none !important; }
 
 /* Project names become grab bars: a thin line at rest, a thicker bar on hover. Drag it to reorder
    projects; click it for the colour / tag / column menu; the arrow on its left collapses the project. */
@@ -102,7 +103,7 @@ aside.dframe-sidebar .df-recents-anchor > [data-cskin-project] [class*="group/se
 /* the default grey box a little lighter than the coloured ones (asked 2026-10-07) */
 aside.dframe-sidebar .df-recents-anchor > [data-cskin-project]:not([data-cskin-colored]) [class*="group/section"] { background: color-mix(in srgb, var(--cskin-c) 4%, transparent); }
 /* Every project box gets a faint 1px edge in its own colour (grey for the uncoloured ones) so the box's end is
-   visible. Dark mode first (2026-10-18), then light mode too at Cskin's request the same day. */
+   visible. Dark mode first (2026-10-18), then light mode too at the author's request the same day. */
 aside.dframe-sidebar .df-recents-anchor > [data-cskin-project] [class*="group/section"] {
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--cskin-c) 12%, transparent); }   /* 24%, then 16%: too strong in light mode */
 aside.dframe-sidebar .df-recents-anchor > [data-cskin-project]:not([data-cskin-colored]) [class*="group/section"] {
@@ -212,6 +213,10 @@ aside.dframe-sidebar .df-titlebar .cskin-new { display: flex; align-items: cente
   color: hsl(var(--text-300)); -webkit-app-region: no-drag; }
 aside.dframe-sidebar .df-titlebar .cskin-new:hover { background: hsl(var(--text-500) / 0.12); color: hsl(var(--text-100)); }
 aside.dframe-sidebar .df-titlebar .cskin-search { width: 24px; margin-left: 0; flex-shrink: 0; }
+aside.dframe-sidebar .df-titlebar .cskin-sched { display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  width: 24px; height: 26px; margin-left: 0; border: 0; border-radius: 7px; background: none; cursor: pointer;
+  color: hsl(var(--text-300)); -webkit-app-region: no-drag; }
+aside.dframe-sidebar .df-titlebar .cskin-sched:hover { background: hsl(var(--text-500) / 0.12); color: hsl(var(--text-100)); }
 /* no Hide sidebar button in the sidebar's top bar (⌘B does it); frees room for ＋ and search */
 aside.dframe-sidebar > .df-titlebar > div:has(> button[aria-label="Hide sidebar"]) { display: none !important; }
 
@@ -369,14 +374,18 @@ html[data-cskin-pane-w] div:has(> .tiles-shell > [data-tile-host="plugin"]) { fl
 #cskin-palette .cskin-order-row button { border: 0; background: none; padding: 0 3px; font-size: 8px; color: hsl(var(--text-400)); cursor: pointer; border-radius: 3px; }
 #cskin-palette .cskin-order-row button:hover:not(:disabled) { color: hsl(var(--text-000)); background: hsl(var(--text-500) / 0.15); }
 #cskin-palette .cskin-order-row button:disabled { opacity: .25; cursor: default; }
+/* 2026-10-26: nested chats in the Order list, under their parent, with the same rounded branch as the sidebar */
+#cskin-palette .cskin-order-row.cskin-order-nested { position: relative; padding-left: 14px; }
+#cskin-palette .cskin-order-row.cskin-order-nested::before { content: ""; position: absolute; left: 6px; top: -1px; width: 5px; height: calc(50% + 1px);
+  border-left: 1px solid hsl(var(--text-300) / 0.55); border-bottom: 1px solid hsl(var(--text-300) / 0.55); border-bottom-left-radius: 5px; box-sizing: border-box; }
 
 /* Chat top bar: no project-folder chip ("MISC" with Show in Finder / Copy path / Change folder / Open in terminal);
-   Cskin never uses it (2026-10-05). It is the small 20px-high menu button beside the session title. */
+   the author never uses it (2026-10-05). It is the small 20px-high menu button beside the session title. */
 .epitaxy-titlebar span:has(> button[aria-haspopup="menu"][class*="h-[20px]"][class*="gap-0.75"]) { display: none !important; }
 /* Sidebar footer: no Send feedback (ant) button */
 aside.dframe-sidebar [data-testid="code-sidebar-feedback-button"] { display: none !important; }
 
-/* 2026-10-06 spacing (Cskin):
+/* 2026-10-06 spacing (the author):
    - The Routines heading (the only section title shown as text, outside the project list) sat 4px from the edge:
      move it in to line up with the session dots. Project titles inside the list are lines and are not touched. */
 aside.dframe-sidebar .df-label-inset:not(.df-recents-anchor *) { padding-left: 8px !important; }
@@ -526,13 +535,13 @@ aside.dframe-sidebar > .df-titlebar .cskin-new { margin-left: 6px !important; }
    further right (same gap right as top/bottom); the skin's own unread dot now keeps the name clear of it, so the
    name fades out before the dot like it does for the app's dots */
 aside.dframe-sidebar [data-row] [data-row-label] { padding-inline-start: 4px !important; }   /* [data-row-label]: also reaches rows with a (hidden) description line, whose name sits one level deeper */
-aside.dframe-sidebar [data-row][data-cskin-unread]::after { right: 7px !important; }
-aside.dframe-sidebar [data-row] [data-row-decoration] { margin-inline-end: -1px; }
+aside.dframe-sidebar [data-row][data-cskin-unread]::after { right: 6px !important; }
+aside.dframe-sidebar [data-row] [data-row-decoration] { margin-inline-end: -1.5px; }
 aside.dframe-sidebar [data-row][data-cskin-unread] [data-row-label],
-aside.dframe-sidebar [data-row][data-described]:has([data-row-decoration] [role=img]) [data-row-label] { padding-inline-end: 12px !important; }   /* described rows: the app keeps no room for its own dot either */
+aside.dframe-sidebar [data-row][data-described]:has([data-row-decoration] [role=img]) [data-row-label] { padding-inline-end: 13px !important; }   /* described rows: the app keeps no room for its own dot either */
 aside.dframe-sidebar [data-row][data-cskin-unread] .dframe-fade-label[data-overflowing],
 aside.dframe-sidebar [data-row][data-described]:has([data-row-decoration] [role=img]) .dframe-fade-label[data-overflowing] {
-  -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 12px), transparent 100%) !important; }
+  -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 9px), transparent 100%) !important; }
 
 /* 2026-10-15: no "⋮" button on a session row (right-click has the same menu); the old rule stopped matching after the
    update. The status dot no longer hides on hover, since nothing takes its place. */
@@ -595,12 +604,12 @@ html[data-cskin-pane-w] div[style*="flex-direction: row"]:not(:has(> div > .tile
 [data-tile-host="plugin"] .cskin-pfs { padding-left: 8px; }
 
 /* 2026-10-21: composer buttons in a column once the text is long (tag.js composerStack sets data-cskin-tall) */
-.epitaxy-prompt [data-cskin-tall] div.absolute.bottom-0.right-0 div.flex.items-center.gap-2 { position: relative; }
-.epitaxy-prompt [data-cskin-tall] div.absolute.bottom-0.right-0 div.flex.items-center.gap-2 > .inline-flex:has(> button[aria-label^="Press and hold"]) { position: absolute; right: 0; bottom: calc(100% + 1px); }
-.epitaxy-prompt [data-cskin-tall] [class*="pr-[var(--cmp-trail-w"] { padding-right: 34px !important; }
+.epitaxy-prompt [data-cskin-tall] div.absolute.bottom-0:is(.right-0, .end-0) div.flex.items-center.gap-2 { position: relative; }
+.epitaxy-prompt [data-cskin-tall] div.absolute.bottom-0:is(.right-0, .end-0) div.flex.items-center.gap-2 > .inline-flex:has(> button[aria-label^="Press and hold"]) { position: absolute; right: 0; bottom: calc(100% + 1px); }
+.epitaxy-prompt [data-cskin-tall] :is([class*="pr-[var(--cmp-trail-w"], [class*="pe-[var(--cmp-trail-w"]) { padding-right: 34px !important; }
 .epitaxy-prompt [data-cskin-tall] [class*="max-h-96"]:has(> .ProseMirror) { min-height: 64px !important; }
-.epitaxy-prompt [data-cskin-tall] div.absolute.bottom-0.right-0 div.flex.items-center.gap-2 { transform: translateY(3px); }   /* even gap above mic and below send */
-.epitaxy-prompt [data-cskin-tall] div.absolute.bottom-0.right-0 :is(button[aria-label^="Press and hold"], button[aria-label="Stop"], button[aria-label^="Send"]) { zoom: 0.9; }
+.epitaxy-prompt [data-cskin-tall] div.absolute.bottom-0:is(.right-0, .end-0) div.flex.items-center.gap-2 { transform: translateY(3px); }   /* even gap above mic and below send */
+.epitaxy-prompt [data-cskin-tall] div.absolute.bottom-0:is(.right-0, .end-0) :is(button[aria-label^="Press and hold"], button[aria-label="Stop"], button[aria-label^="Send"]) { zoom: 0.9; }
 
 /* 2026-10-21: status pills keep full width; pack the thumbnails next to the text instead of at the far right */
 .epitaxy-chat-panel :is([data-cds="TurnStatus"], [data-cds="TurnStatusStep"]) > [data-cds-row] > span[class*="flex-1"][class*="h-0"] { order: 10000; }   /* keep it: the wording picker measures free room through it */
@@ -611,3 +620,139 @@ html[data-cskin-pane-w] div[style*="flex-direction: row"]:not(:has(> div > .tile
 
 /* 2026-10-22: the Mark as read button opens a row menu to pick "Mark as completed": keep that menu invisible */
 html[data-cskin-silentmenu] [data-base-ui-portal]:has([role=menu]), html[data-cskin-silentmenu] [role=menu] { opacity: 0 !important; }
+
+/* 2026-10-23 app update (3.6556.1). Composer: the button group is now "end-0" and the text padding "pe-" (the rules
+   above take both names). The "+" moved into the text row on the left; on one line the app keeps 72px clear on the
+   right for stop/send + mic, so the old 24px override is left off. */
+/* Nested sessions (arrow removed for good the same day, the author doesn't want nesting): a session started from a suggestion in another one now sits under it in a .df-accordion-guide box,
+   and the parent row gets a fold arrow that squeezed its name. The arrow now shows only on hover, or
+   always while the nested sessions are folded away, so a folded parent still says so. */
+aside.dframe-sidebar [data-row] [data-row-label] > span:has(> span > [data-container-icon]) { display: none !important; }   /* the author: no nesting at all; tag.js unfolds any folded parent */
+aside.dframe-sidebar .df-accordion-guide::before, aside.dframe-sidebar .df-accordion-guide::after { display: none !important; }
+/* 2026-10-26: the author now uses nesting (a coordinator chat with three chats nested under it). Kept compact: the
+   nested names move in only 8px. A tree line, clearly darker than the project's own separator, drawn per nested
+   chat so nothing overlaps (overlapping see-through lines show darker spots): ::before is the straight line down
+   from the row's top that bends into a rounded quarter-circle branch at the row's middle; ::after carries the
+   straight line on to the next chat (not on the one shown last, which tag.js marks data-cskin-nest-last, so the tree ends in the curve). the author asked for a
+   stronger line, then branches, then rounded branches, all the same day. The grey is SOLID (mixed from the theme's
+   text and background colours): a see-through grey showed brighter where the curve and the straight line meet.
+   Every piece is a 1px BORDER (2026-10-28): at a 1.44x screen scale a border draws 0.69px wide but a 1px-wide
+   filled bar draws 1px, on different pixels, so the line looked patched together. Same day: the grey is now the
+   project bar's grey (hsl(220 8% 55%) at 60%, made solid), branches 7px long with a 4px curve (were 6px / 5px hooks), nested names 9px in. The fold arrow stays hidden (tag.js keeps
+   parents unfolded). Forks stay flat (rules above). */
+aside.dframe-sidebar .df-accordion-guide.df-family { --df-row-indent: 9px !important; --cskin-tree: color-mix(in srgb, hsl(220 8% 55%) 60%, hsl(var(--bg-000))); position: relative; }
+aside.dframe-sidebar .df-accordion-guide.df-family > .df-drag-shiftable::before { content: ""; position: absolute; left: 4px; top: 0;
+  width: 7px; height: calc(50% + 0.5px); box-sizing: border-box; border-left: 1px solid var(--cskin-tree); border-bottom: 1px solid var(--cskin-tree);
+  border-bottom-left-radius: 4px; pointer-events: none; z-index: 1; }
+aside.dframe-sidebar .df-accordion-guide.df-family > .df-drag-shiftable:not([data-cskin-nest-last])::after { content: ""; position: absolute; left: 4px;
+  top: calc(50% - 4px); bottom: 0; width: 0; border-left: 1px solid var(--cskin-tree); pointer-events: none; z-index: 1; }
+
+/* 2026-10-23 update: a running session lost its grey dot; instead the name gets a shimmer that runs ~1 s on, ~1 s off,
+   so half the time nothing shows. the author keeps the shimmer, plus a grey dot where the unread dot sits that pulses but
+   never fades out (opacity 1 to 0.45), so a running session is always visible. */
+@keyframes cskin-run-pulse { 0%, 100% { opacity: 1; transform: translateY(-50%) scale(1); } 50% { opacity: .45; transform: translateY(-50%) scale(.8); } }
+aside.dframe-sidebar [data-row]:has([data-attention="working"])::after { content: ""; position: absolute; top: 50%; right: 6px; width: 8px; height: 8px;
+  transform: translateY(-50%); border-radius: 50%; background: var(--cds-gray-500, #9b9b9b); pointer-events: none;
+  animation: cskin-run-pulse 1.6s ease-in-out infinite; }
+aside.dframe-sidebar [data-row]:has([data-attention="working"]) [data-row-label] { padding-inline-end: 13px !important; }
+aside.dframe-sidebar [data-row]:has([data-attention="working"]) .dframe-fade-label[data-overflowing] {
+  -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 9px), transparent 100%) !important; }
+
+/* 2026-10-23 update: every row's click area (.hit-row-main::before) now reaches 7px below the row (--cds-hit-gap-y)
+   to fill the app's row gaps. The skin has no gaps, so that reach lay over the next project's top bar: pointing at
+   the bar also hovered the row above, whose hover box showed up in the gap ("ghost" box, the author's recording). No reach. */
+aside.dframe-sidebar .hit-row { --cds-hit-row-reach-top: 0px !important; --cds-hit-row-reach-bottom: 0px !important; --cds-hit-row-reach-x: 0px !important; }
+/* ...that was not all of it. The same update added its own hover pill on a project's header ([data-sidebar-group-label]
+   ::before: full width, row high, bottom-anchored, --df-hover grey) with a stronger selector than the skin's line, which
+   uses that same ::before. On hover the skin's line turned into a 22px grey box pulled up over the project above, then
+   grew into place: the "ghost" in the author's recording. While the bar is hovered the skin's thick coloured bar wins again. */
+aside.dframe-sidebar .df-recents-anchor [class*="group/labelrow"]:hover::before {
+  top: 50% !important; bottom: auto !important; left: max(15%, 22px) !important; right: max(15%, 22px) !important;
+  height: 7px !important; border-radius: 999px !important; z-index: auto !important; background: var(--cskin-c, hsl(var(--text-500) / 0.30)) !important; }
+
+/* 2026-10-23 update: the New and Search rows came back at the top of the session list (.dframe-nav-scroll > .shrink-0);
+   the skin's ＋ and magnifier in the top bar replace them (＋ clicks the hidden New row, the magnifier sends ⌘K) */
+aside.dframe-sidebar .dframe-nav-scroll button[data-row-nav]:is([aria-keyshortcuts="Meta+n"], [aria-keyshortcuts="Meta+k"]) { display: none !important; }
+aside.dframe-sidebar .dframe-nav-scroll > .shrink-0:has(button[data-row-nav]:is([aria-keyshortcuts="Meta+n"], [aria-keyshortcuts="Meta+k"])):not(:has([data-row]:not([aria-keyshortcuts="Meta+n"], [aria-keyshortcuts="Meta+k"]))) { display: none !important; }
+
+/* 2026-10-23 update swapped the app's status colours: "Unread response" went grey (--cds-text-muted) and "Awaiting
+   input" went blue (--cds-fill-accent). That clashed with the skin's blue sticky unread dot and grey running dot.
+   Back to the old meaning: unread = blue, waiting for you = orange (the app's own --cds-fill-warning is yellow). */
+aside.dframe-sidebar [data-row] [role=img][aria-label="Unread response"] [data-cds="Pulse"] { background: var(--cds-fill-accent) !important; }
+aside.dframe-sidebar [data-row] [role=img][aria-label="Awaiting input"] [data-cds="Pulse"] { background: #f0802a !important; }
+
+/* 2026-10-23 update: the pane header's toolbar now sits inside a .cds-root.contents wrapper (not a direct child), the
+   title is span[data-cds=OverflowTooltip] and a pane drag handle (a short line) sits under it. Toolbar fills the row
+   again (Expand back at the right end), title hidden, handle line hidden. */
+[data-tile-host="plugin"] [data-pane-root] > [data-top-right] [role="toolbar"] { flex: 1 1 auto; min-width: 0; height: 100%; }
+[data-tile-host="plugin"] [data-pane-root] > [data-top-right] [role="toolbar"] [data-cds="OverflowTooltip"] { visibility: hidden; }
+[data-tile-host="plugin"] [data-pane-root] > [data-top-right] .tiles-drag-handle-affordance { display: none !important; }
+[data-tile-host="plugin"] [data-pane-root] > [data-top-right] [role="toolbar"]::after { display: none !important; }   /* its own divider line under the toolbar */
+
+/* 2026-10-25: folded project, pointer resting on it before it opens (PEEK_OPEN 0.55 s): keep the first session's name
+   in place. The ghost-box fix above turned this spot into a 7px pill on hover, so the name vanished under the
+   pointer. Arrow and colour dot wait for the peek too, so nothing covers the name. */
+aside.dframe-sidebar .df-recents-anchor > [data-cskin-folded]:not([data-cskin-peek]) [class*="group/labelrow"]:hover::before {
+  top: 50% !important; bottom: auto !important; left: 5px !important; right: 5px !important; height: auto !important;
+  border-radius: 0 !important; background: none !important; z-index: auto !important;
+  /* the app's own hover rule empties this spot (content: ""), so the name is put back explicitly */
+  content: attr(data-cskin-first) !important; font-size: 9px !important; font-weight: 550 !important; line-height: 12px !important;
+  color: hsl(var(--text-400)) !important; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; }
+aside.dframe-sidebar .df-recents-anchor > [data-cskin-folded]:not([data-cskin-peek]) [class*="group/labelrow"]:has(.cskin-tags):hover::before { right: calc(var(--cskin-tag-w, 30%) + 8px) !important; }
+aside.dframe-sidebar .df-recents-anchor > [data-cskin-folded]:not([data-cskin-peek]) [class*="group/labelrow"] :is(.cskin-chev, .cskin-swatch) {
+  opacity: 0 !important; visibility: hidden !important; transition: none !important; }
+
+/* 2026-10-25: names cut off too early. The app fades the last 24px of any name that does not fit, even one that is 2px
+   too long lost three letters, and each row kept 8px empty on the right. Now the row keeps 4px,
+   and tag.js sets --cskin-fade per name: the overflow plus 8px, at most 24px, so a nearly-fitting name loses only
+   its last letter's edge. */
+aside.dframe-sidebar .df-recents-anchor [data-row] > button[data-row-main-button] { padding-inline-end: 4px !important; }
+aside.dframe-sidebar [data-row] [data-row-label] .dframe-fade-label[data-overflowing][data-overflowing][data-overflowing][data-overflowing] {
+  -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - var(--cskin-fade, 24px)), transparent 100%) !important;
+  mask-image: linear-gradient(90deg, #000 calc(100% - var(--cskin-fade, 24px)), transparent 100%) !important; }
+
+/* 2026-10-25: compact question card (asked when one-word answers sat in a 260px box). Every answer row had
+   16px padding all round. Now: tighter header, rows and buttons; and when no answer has a description (one-word
+   answers), the answers sit side by side as pills, the chosen one filled. Answers that do have
+   descriptions keep their rows, just tighter, so nothing gets hidden. Same card for every question Claude asks. */
+.epitaxy-chat-panel .epitaxy-question-card { padding: 0 !important; gap: 0 !important; }
+.epitaxy-chat-panel .epitaxy-question-card > div:first-child { padding: 8px 12px !important; }
+.epitaxy-chat-panel .epitaxy-question-card .epitaxy-answer-option { padding: 7px 12px !important; gap: 8px !important; }
+.epitaxy-chat-panel .epitaxy-question-card .epitaxy-answer-option .flex-col { gap: 1px !important; }
+.epitaxy-chat-panel .epitaxy-question-card .epitaxy-approval-actions { padding: 4px 10px 8px !important; }
+/* pill mode: no option has a second line (description) */
+.epitaxy-chat-panel .epitaxy-question-card:not(:has(.epitaxy-answer-option .flex-col > :nth-child(2))) .flex.flex-col:has(> .epitaxy-answer-option) {
+  flex-direction: row !important; flex-wrap: wrap; gap: 6px; padding: 8px 12px 2px; }
+.epitaxy-chat-panel .epitaxy-question-card:not(:has(.epitaxy-answer-option .flex-col > :nth-child(2))) .epitaxy-answer-option {
+  width: auto !important; flex: 0 0 auto; align-items: center !important; padding: 4px 12px !important; border-radius: 999px !important;
+  border: 1px solid hsl(var(--text-500) / 0.35) !important; background: none !important; }
+.epitaxy-chat-panel .epitaxy-question-card:not(:has(.epitaxy-answer-option .flex-col > :nth-child(2))) .epitaxy-answer-option:hover {
+  background: hsl(var(--text-500) / 0.12) !important; }
+.epitaxy-chat-panel .epitaxy-question-card:not(:has(.epitaxy-answer-option .flex-col > :nth-child(2))) .epitaxy-answer-option:has([data-checked]) {
+  background: var(--cds-fill-accent) !important; border-color: var(--cds-fill-accent) !important; }
+.epitaxy-chat-panel .epitaxy-question-card:not(:has(.epitaxy-answer-option .flex-col > :nth-child(2))) .epitaxy-answer-option:has([data-checked]) :is(.text-body, span) { color: #fff !important; }
+.epitaxy-chat-panel .epitaxy-question-card:not(:has(.epitaxy-answer-option .flex-col > :nth-child(2))) .epitaxy-answer-option .epitaxy-radio-mark { display: none !important; }
+.epitaxy-chat-panel .epitaxy-question-card:not(:has(.epitaxy-answer-option .flex-col > :nth-child(2))) .epitaxy-answer-option .text-body.text-primary { font-weight: 500 !important; }
+/* "Other" picked: it opens a text box, so it takes the whole line */
+.epitaxy-chat-panel .epitaxy-question-card .epitaxy-answer-option:has(:is(input, textarea, [contenteditable])) {
+  flex: 1 1 100% !important; border-radius: 10px !important; }
+
+/* 2026-10-25: no orange "Needs your input" label (and its dot) in the status line under the chat */
+[data-morph-key^="blocked|"] { display: none !important; }
+:has(> span.flex.min-w-0.gap-xs [data-morph-key^="blocked|"]) { display: none !important; }
+.epitaxy-chat-panel .epitaxy-question-card:not(:has(.epitaxy-answer-option .flex-col > :nth-child(2))) .epitaxy-answer-option.grid { align-content: center; line-height: 20px; }
+
+/* 2026-10-25 (seen in a screenshot): some rows keep an EMPTY status-dot slot ([data-row-decoration] with
+   nothing in it) plus a spacer span after the name sized for that dot, so the name was cut ~18px early with room to
+   spare. No dot, no spacer. */
+aside.dframe-sidebar [data-row]:has([data-row-decoration]:empty) button[data-row-main-button] > span.shrink-0:empty { display: none !important; }
+
+/* 2026-10-28: the author: dots too tight to the edge, and the app's own dots had moved 3px in (its dot box changed), so
+   they no longer lined up with the skin's. Now every dot sits 6px from the row's right edge (skin dots right: 6px,
+   app dots via [data-row-decoration] margin -1.5px), names end 3px before it (room 13px / app slot 9px).
+   2026-10-26: every dot at the far right of its row, 2px from the edge (the author: the app's dots sat further right than
+   the skin's own unread and running dots, which looked untidy). The app's dot moved 1.5px right, the skin's 5px
+   (right: 2px above). Names now run to 3px before the dot: the app's empty slot after the name (12.5px plus a 4px
+   gap) is 5px, and the room the skin keeps for its own dots is 9px. tag.js also shortened the fade on cut-off names
+   (overflow plus 6px, at most 14px; it was plus 8px, at most 24px). */
+aside.dframe-sidebar [data-row] > button[data-row-main-button] > span.shrink-0:last-child:not(:first-child) { margin-inline-end: 9px !important; }
