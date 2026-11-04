@@ -462,10 +462,20 @@ window.__cskinCcIv = setInterval(() => {
     while (box && !(model = box.querySelector('[data-testid="epitaxy-cds-model-selector"]'))) box = box.parentElement;
     const right = model?.closest('.ms-auto'), slot = right?.previousElementSibling, lead = slot?.previousElementSibling;
     if (!right || !slot || !lead) { drop(); continue; }
+    // 2026-10-31 update: "Bypass permissions" moved into the right group and the left item is now empty (0 wide);
+    // then the free space starts at the row's own left edge
     const rr = right.getBoundingClientRect(), lr = lead.getBoundingClientRect();
-    if (!rr.width || !lr.width) { drop(); continue; }
+    if (!rr.width) { drop(); continue; }
+    const leftEdge = lr.width ? lr.right : right.parentElement.getBoundingClientRect().left;
     let end = rr.left;
     for (const c of slot.querySelectorAll('[data-engine-status-chip]')) { const r = c.getBoundingClientRect(); if (r.width) end = Math.min(end, r.left); }
+    // 2026-11-04 (the author: above the box, scrolling the chat snapped and blinked): it used to test the fit by lifting the
+    // frame, measuring, and dropping it again every 300 ms, which re-laid out the chat (190 style writes in 3 s). The
+    // chip's width is now read where it sits, nothing moves unless the answer changes, and lifting needs 12px more room
+    // than staying, so it cannot flip at the edge. Contents + the chip's 17px of padding = its width in the row.
+    const chip = host.shadowRoot.querySelector('img[alt="Cache time left"]').parentElement.parentElement, kids = chip.children;
+    const chipW = kids[kids.length - 1].getBoundingClientRect().right - kids[0].getBoundingClientRect().left + 17;
+    if (end - 14 - chipW < leftEdge + 10 + (frame.hasAttribute('data-cskin-cc') ? 0 : 12)) { drop(); continue; }
     // pinned (absolute) to the bottom-right corner of the box that holds both the message box and the row under it,
     // so it moves with that row in the same frame as the message box grows or shrinks; no timer lag (2026-10-26:
     // the earlier fixed position followed only every 300 ms, so it jumped on each new or deleted line)
@@ -476,8 +486,7 @@ window.__cskinCcIv = setInterval(() => {
     }
     const cb = frame.offsetParent; if (!cb) { drop(); continue; }
     const br = cb.getBoundingClientRect(), cr = frame.getBoundingClientRect();
-    const x = end - 14 - cr.width, y = (rr.top + rr.bottom) / 2 - cr.height / 2;
-    if (x < lr.right + 10) { drop(); continue; }
+    const y = (rr.top + rr.bottom) / 2 - cr.height / 2;
     const Rt = Math.round(br.right - (end - 14)) + 'px', Bt = Math.round(br.bottom - (y + cr.height)) + 'px';
     if (frame.style.right !== Rt) frame.style.setProperty('right', Rt, 'important');
     if (frame.style.bottom !== Bt) frame.style.setProperty('bottom', Bt, 'important');
@@ -925,7 +934,12 @@ const markNotSent = () => {
 // --- Composer buttons in a column (2026-10-21): the app keeps only 24px of text margin on the right while the send
 // and mic buttons take ~70px side by side, so the last line ran under them. Once the text wraps, or a single line
 // reaches the buttons, the shell gets data-cskin-tall: mic stacks above send and the text keeps 34px clear.
-// It switches back only with a 12px gap, so the box does not flicker at the edge.
+// 2026-10-31 (the author: the line wrapped, jumped back up, then wrapped again): switching only AFTER the text wrapped
+// widened the first line by 38px (72px kept clear -> 34px), so the wrapped word fitted on line 1 again. Now it
+// switches while the first line is still filling: once the text's end is within 16px (about two letters) of where
+// the app wraps it. The line then carries on into the extra room and wraps once. Back to side by side only on one
+// line ending 28px short of that wrap point (12px gap against flicker). Checked on every keystroke too (before the
+// screen redraws), since typing inside a line is not always seen as a page change.
 const composerStack = () => {
   for (const pm of document.querySelectorAll('.epitaxy-prompt .ProseMirror')) {
     const shell = pm.closest('[class*="bg-surface-3"]'), grp = shell?.querySelector('div.absolute.bottom-0.right-0, div.absolute.bottom-0.end-0'); if (!grp) continue;
@@ -933,12 +947,17 @@ const composerStack = () => {
     const tops = new Set(); let right = 0; const w = document.createTreeWalker(pm, NodeFilter.SHOW_TEXT);
     for (let t; (t = w.nextNode());) { if (!t.textContent.trim()) continue; const r = document.createRange(); r.selectNodeContents(t);
       for (const q of r.getClientRects()) if (q.width > 1) { tops.add(Math.round(q.top / 4)); right = Math.max(right, q.right); } }
-    const lines = tops.size;
-    const edge = grp.getBoundingClientRect().right - 72, was = shell.hasAttribute('data-cskin-tall');
-    const tall = window.__cskinTallTest || (was ? (lines > 1 || right > edge - 12) : (lines > 1 || right > edge));
+    const lines = tops.size, was = shell.hasAttribute('data-cskin-tall');
+    // where the app wraps a line with the buttons side by side (remembered, since tall mode moves it)
+    if (!was) { const pr = pm.getBoundingClientRect(); shell.__cskinWrapAt = pr.right - (parseFloat(getComputedStyle(pm).paddingRight) || 0); }
+    const wrapAt = shell.__cskinWrapAt || (grp.getBoundingClientRect().right - 72);
+    const tall = window.__cskinTallTest || lines > 1 || right > wrapAt - (was ? 28 : 16);
     if (tall !== was) shell.toggleAttribute('data-cskin-tall', tall);
   }
 };
+if (window.__cskinStackKey) document.removeEventListener('input', window.__cskinStackKey, true);
+window.__cskinStackKey = e => { if (e.target?.closest?.('.epitaxy-prompt .ProseMirror')) try { composerStack(); } catch {} };
+document.addEventListener('input', window.__cskinStackKey, true);
 // --- Status pills (2026-10-21): the row keeps its full width (fit-content made the app's wording picker loop);
 // the grey pill is clipped just past its last item. Width is written only when it changes.
 const pillWidths = () => {
