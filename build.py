@@ -2,9 +2,9 @@
 # Run after editing either file:  python3 build.py
 import json, pathlib
 here = pathlib.Path(__file__).parent
-css = (here / "skin.css").read_text()
-cfg = (here / "skin-config.json").read_text()
-ui = (here / "skin-ui.js").read_text()
+css = (here / "skin.css").read_text(encoding="utf-8")
+cfg = (here / "skin-config.json").read_text(encoding="utf-8")
+ui = (here / "skin-ui.js").read_text(encoding="utf-8")
 js = f"""(() => {{
   let s = document.getElementById('claude-skin-style');
   if (!s) {{ s = document.createElement('style'); s.id = 'claude-skin-style'; document.head.appendChild(s); }}
@@ -21,5 +21,5 @@ def esc(c):
     o -= 0x10000
     return "\\u%04x\\u%04x" % (0xD800 + (o >> 10), 0xDC00 + (o & 0x3FF))
 js = "".join(esc(c) for c in js)
-(here / "apply.js").write_text(js)
+(here / "apply.js").write_text(js, encoding="utf-8")
 print("apply.js built,", len(js), "bytes")
