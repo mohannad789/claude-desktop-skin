@@ -57,7 +57,7 @@ aside.dframe-sidebar .df-recents-anchor [class*="group/labelrow"]::before {     
   transition: height .12s ease, background-color .12s ease, right .12s ease; }
 aside.dframe-sidebar .df-recents-anchor [class*="group/labelrow"]:hover::before {
   height: 7px; background: hsl(var(--text-500) / 0.30); transition-delay: .25s; }
-aside.dframe-sidebar .df-recents-anchor [class*="group/labelrow"] > :not(button[class*="group/label"]):not(.cskin-swatch):not(.cskin-chev):not(.cskin-tags) { display: none !important; }
+aside.dframe-sidebar .df-recents-anchor [class*="group/labelrow"] > :not(button[class*="group/label"]):not(.cskin-swatch):not(.cskin-chev):not(.cskin-tags):not(.cskin-gname) { display: none !important; }
 aside.dframe-sidebar .df-recents-anchor [class*="group/labelrow"] > button[class*="group/label"] {
   width: 100% !important; height: 100% !important; margin: 0 !important; opacity: 0; cursor: grab; }
 aside.dframe-sidebar .df-recents-anchor > * { padding-bottom: 7px; }
@@ -75,8 +75,7 @@ aside.dframe-sidebar .df-recents-anchor button.w-full .dframe-fade-label { font-
 
 
 
-/* Shorter bar above the sidebar, and less space before the first item */
-html body .dframe-root { --df-header-h: 34px !important; }   /* was 48px */
+/* Less space before the sidebar's first item (the bar above it keeps Claude's height since 2026-11-12) */
 aside.dframe-sidebar [data-testid="sidebar"] { padding-top: 2px !important; }
 
 /* Shorter bar at the bottom of the sidebar (your name and plan) */
@@ -183,20 +182,16 @@ aside.dframe-sidebar .df-recents-anchor > [data-cskin-peek] .cskin-tags { opacit
 /* Message box: at most about 8 lines tall, then it scrolls */
 .dframe-content [class*="max-h-96"]:has(> .ProseMirror) { max-height: calc(8lh + 6px) !important; }
 
-/* Top-right buttons Terminal / Changes / Browser live in the ⋮ menu instead (added by tag.js) */
-.dframe-content .epitaxy-titlebar button[aria-label="Terminal"],
-.dframe-content .epitaxy-titlebar button[aria-label="Changes"],
-.dframe-content .epitaxy-titlebar button[aria-label="Browser"],
-.dframe-content .epitaxy-titlebar button[aria-label="Files"] { display: none !important; }   /* Files: moved into the ⋮ menu by tag.js, like the others (2026-10-09) */
+/* Top-right buttons Terminal / Changes / Browser / Files / Session rail: they used to move into the ⋮ menu; since
+   2026-11-12 (asked) they stay in the top bar, as in Claude itself */
 .cskin-menu-item { cursor: default; }
 .cskin-menu-item:hover { background: var(--cds-fill-ghost-hover, hsl(var(--text-500) / 0.08)); }
 .cskin-menu-item .cskin-keys { color: var(--cds-text-muted, hsl(var(--text-400))); margin-left: 12px; }
 .cskin-menu-item .cskin-on { color: var(--cds-fill-accent, hsl(var(--accent-brand))); font-size: 8px; margin-left: 6px; }
 .cskin-menu-sep { height: 1px; margin: 4px 6px; background: hsl(var(--text-500) / 0.15); }
 
-/* Shorter top bar above the chat */
-.dframe-content .epitaxy-titlebar { height: 26px !important; }
-div:has(> div > div > .tiles-shell) { padding-top: 3px !important; }
+/* The chat's top bar keeps Claude's own height, spacing and title size (asked 2026-11-12; the skin used to shrink it
+   to 26px with the buttons 1px from the top, set --df-header-h to 34px and the title to 11.5px) */
 
 /* Bar above the sidebar: no Back/Forward; the sidebar's Search box becomes a magnifier button here */
 aside.dframe-sidebar .df-titlebar button[aria-label="Back"],
@@ -281,7 +276,6 @@ aside.dframe-sidebar .df-recents-anchor [class*="group/labelrow"]:has(.cskin-tag
 .epitaxy-chat-panel [class*="--chat-column-gutter-start"] { --chat-gutter: 12px !important; }
 
 /* Session name in the chat's top bar: smaller (was 13px) */
-.epitaxy-titlebar button.truncate[class*="text-body-medium"] { font-size: 11.5px !important; }
 
 /* Message action bar (copy / branch / pin / read aloud / time): always visible instead of on hover, and smaller */
 .epitaxy-chat-panel [data-cds="MessageActions"]:not([data-deferred]) { opacity: 1 !important; scale: 1 !important; visibility: visible !important; pointer-events: auto !important; zoom: .8; }
@@ -500,8 +494,6 @@ aside.dframe-sidebar .df-recents-anchor > [data-cskin-folded]:not([data-cskin-pe
    isn't cut off by the pane's top edge (2026-10-14) */
 [data-tile-host="plugin"] .pointer-events-auto.isolate[class*="overflow-y"] { padding-top: 4px !important; }
 
-/* Session rail (new in the 2026-10-14 app update): moved into the ⋮ menu by tag.js like Terminal, Changes, Browser, Files */
-.dframe-content .epitaxy-titlebar button[aria-label$="session rail"] { display: none !important; }
 
 /* 2026-10-14 app update. Forks: a forked session is filed under the one it came from with a guide line and an
    extra indent; the skin keeps every session flat in its project instead (the order is the skin's own anyway). */
@@ -672,8 +664,8 @@ aside.dframe-sidebar .df-recents-anchor [class*="group/labelrow"]:hover::before 
 
 /* 2026-10-23 update: the New and Search rows came back at the top of the session list (.dframe-nav-scroll > .shrink-0);
    the skin's ＋ and magnifier in the top bar replace them (＋ clicks the hidden New row, the magnifier sends ⌘K) */
-aside.dframe-sidebar .dframe-nav-scroll button[data-row-nav]:is([aria-keyshortcuts="Meta+n"], [aria-keyshortcuts="Meta+k"]) { display: none !important; }
-aside.dframe-sidebar .dframe-nav-scroll > .shrink-0:has(button[data-row-nav]:is([aria-keyshortcuts="Meta+n"], [aria-keyshortcuts="Meta+k"])):not(:has([data-row]:not([aria-keyshortcuts="Meta+n"], [aria-keyshortcuts="Meta+k"]))) { display: none !important; }
+aside.dframe-sidebar .dframe-nav-scroll button[data-row-nav]:is([aria-keyshortcuts="Meta+n"], [aria-keyshortcuts$="Meta+k"]) { display: none !important; }
+aside.dframe-sidebar .dframe-nav-scroll > .shrink-0:has(button[data-row-nav]:is([aria-keyshortcuts="Meta+n"], [aria-keyshortcuts$="Meta+k"])):not(:has([data-row]:not([aria-keyshortcuts="Meta+n"], [aria-keyshortcuts$="Meta+k"]))) { display: none !important; }
 
 /* 2026-10-23 update swapped the app's status colours: "Unread response" went grey (--cds-text-muted) and "Awaiting
    input" went blue (--cds-fill-accent). That clashed with the skin's blue sticky unread dot and grey running dot.
@@ -756,3 +748,100 @@ aside.dframe-sidebar [data-row]:has([data-row-decoration]:empty) button[data-row
    gap) is 5px, and the room the skin keeps for its own dots is 9px. tag.js also shortened the fade on cut-off names
    (overflow plus 6px, at most 14px; it was plus 8px, at most 24px). */
 aside.dframe-sidebar [data-row] > button[data-row-main-button] > span.shrink-0:last-child:not(:first-child) { margin-inline-end: 9px !important; }
+
+/* 2026-11-12: wide chat (the ↔ button at the left end of the row under the message box; tag.js addWideToggle).
+   The chat column uses the panel's full width, 2rem in from each side. The app draws one column box per turn (your
+   messages, Claude's replies, status lines) plus one for the message box, each capped at about 840px and centred;
+   all of them lose the cap and get the same 2rem, so your messages, the replies and the box share the same edges.
+   (The first version lifted only the boxes around Claude's replies, so your messages stayed in the narrow column.) */
+html[data-cskin-wide] .epitaxy-chat-panel [class*="--chat-column-gutter-start"] { max-width: none !important;
+  padding-left: 2rem !important; padding-right: 2rem !important; }
+/* the message box's column: 2rem plus the scroll bar room the message list keeps on each side (tag.js applyWide) */
+html[data-cskin-wide] .epitaxy-chat-panel [class*="--chat-column-gutter-start"]:has(.epitaxy-prompt) {
+  padding-left: calc(2rem + var(--cskin-wide-sg-l, 0px)) !important; padding-right: calc(2rem + var(--cskin-wide-sg-r, 0px)) !important; }
+html[data-cskin-wide] .epitaxy-chat-panel .epitaxy-approval-card:has(.epitaxy-answer-option) { max-width: 100% !important; }
+.cskin-wide-toggle, .cskin-settings-btn { display: inline-flex; align-items: center; justify-content: center; flex: none; width: 24px; height: 24px; padding: 0;
+  border: 0; border-radius: 7px; background: none; color: hsl(var(--text-500)); cursor: pointer; }
+.cskin-settings-btn:hover, .cskin-wide-toggle:hover { background: hsl(var(--text-500) / 0.12); color: hsl(var(--text-100)); }
+.cskin-wide-toggle.on { color: var(--cds-fill-accent, hsl(var(--accent-brand))); }
+
+/* 2026-11-12: each group's name above its bar. The row gets 12px more on top (a margin, so the bar, arrow, dot and
+   tags stay where they were); the name sits in it, inside the group's box. Click it for the same menu as the bar.
+   Your own name for a group comes from the menu (tag.js renameHead); hovering the name shows the app's name. */
+html:not([data-cskin-nogname]) aside.dframe-sidebar .df-recents-anchor [class*="group/labelrow"]:has(> .cskin-gname) { margin-top: 13px !important; }
+html[data-cskin-nogname] aside.dframe-sidebar .df-recents-anchor .cskin-gname { display: none !important; }   /* switched off in the skin's settings */
+aside.dframe-sidebar .df-recents-anchor .cskin-gname { position: absolute; left: 6px; right: 6px; bottom: 100%; z-index: 2;
+  font-size: 9.5px; font-weight: 600; line-height: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer;
+  color: color-mix(in srgb, var(--cskin-c, hsl(var(--text-400))) 55%, hsl(var(--text-200))); }
+aside.dframe-sidebar .df-recents-anchor .cskin-gname:hover { color: hsl(var(--text-100)); }
+
+/* 2026-11-12: a group set to "2 columns" in its menu spans the whole sidebar. Groups before it fill the two columns
+   above it, groups after it continue in two columns below it. With one, the columns are balanced, because the app's
+   "fill the left column first" would put everything after it in the left column. */
+aside.dframe-sidebar .df-recents-anchor > [data-cskin-span] { column-span: all; }
+aside.dframe-sidebar .df-recents-anchor:has(> [data-cskin-span]) { column-fill: balance; }
+
+/* the group menu: name with a rename pencil, the 1 / 2 columns switch */
+#cskin-palette .cskin-p-rename { display: flex; align-items: center; gap: 4px; cursor: text; }
+#cskin-palette .cskin-p-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+#cskin-palette .cskin-p-edit { flex: none; display: inline-flex; padding: 2px; border: 0; border-radius: 5px; background: none; color: hsl(var(--text-400)); cursor: pointer; }
+#cskin-palette .cskin-p-edit:hover { background: hsl(var(--text-500) / 0.14); color: hsl(var(--text-100)); }
+#cskin-palette .cskin-name-in { width: 100%; box-sizing: border-box; font-weight: 600; }
+#cskin-palette .cskin-span-row { cursor: default; justify-content: space-between; }
+#cskin-palette .cskin-span-row:hover { background: none; }
+#cskin-palette .cskin-seg { display: inline-flex; gap: 2px; padding: 2px; border-radius: 7px; background: hsl(var(--text-500) / 0.10); }
+#cskin-palette .cskin-seg button { border: 0; border-radius: 5px; padding: 2px 7px; background: none; color: hsl(var(--text-300)); font: inherit; font-size: 11px; cursor: pointer; }
+#cskin-palette .cskin-seg button.on { background: hsl(var(--bg-000)); color: hsl(var(--text-100)); box-shadow: 0 0 0 1px hsl(var(--text-500) / 0.18); }
+
+/* 2026-11-12: Home / Code switch cut off at the top. The app pulls it up 12px into the sidebar's top padding, which
+   the skin cut to 2px, so 10px of it went under the sidebar's clipped edge. */
+aside.dframe-sidebar [data-testid="sidebar"] > [data-segmented] { margin-top: 0 !important; }
+
+/* 2026-11-12: skin settings menu (the gear under the message box, tag.js openSettings): on/off switches */
+#cskin-settings { position: fixed; z-index: 99999; min-width: 190px; background: hsl(var(--bg-000)); color: hsl(var(--text-100));
+  border: 1px solid hsl(var(--text-500) / 0.18); border-radius: 10px; padding: 7px; box-shadow: 0 8px 24px rgb(0 0 0 / 0.18); font-size: 12px; }
+#cskin-settings .cskin-p-head { font-size: 12px; font-weight: 600; margin: 0 2px 6px; }
+#cskin-settings .cskin-set-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; padding: 5px 6px;
+  border: 0; border-radius: 6px; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+#cskin-settings .cskin-set-row:hover { background: hsl(var(--text-500) / 0.12); }
+.cskin-switch { flex: none; position: relative; width: 26px; height: 15px; border-radius: 999px; background: hsl(var(--text-500) / 0.35); transition: background .12s; }
+.cskin-switch i { position: absolute; top: 2px; left: 2px; width: 11px; height: 11px; border-radius: 50%; background: #fff; transition: left .12s; }
+.cskin-switch.on { background: var(--cds-fill-accent, hsl(var(--accent-brand))); }
+.cskin-switch.on i { left: 13px; }
+
+/* 2026-11-12: the groups sat 2px from the sidebar's left edge and 4px from its right edge (the scroll area ends 2px
+   short of the sidebar). 2px more on the left of the group list makes both sides 4px. */
+aside.dframe-sidebar .df-recents-anchor { margin-left: 2px !important; }
+
+/* 2026-11-12: wide chat with the session rail open (⋮ → Session rail). The app then centres the chat by keeping the
+   rail's width empty on BOTH sides (320px each), and gives the message box its own fixed width (about 420px). In wide
+   mode the empty space on the left goes, the right one stays (the rail sits there), and the message box spans the same
+   width as the messages. Closed rail: these values are 0 and nothing changes. */
+html[data-cskin-wide] .epitaxy-chat-panel [class*="ps-[var(--session-rail-band-start)]"] { padding-left: 0 !important; }
+html[data-cskin-wide] .epitaxy-chat-panel [data-autoscroll-container="true"] { margin-left: 0 !important; padding-left: 0 !important; }
+html[data-cskin-wide] .epitaxy-chat-panel [data-epitaxy-chat-column] { margin-left: 0 !important;
+  margin-right: calc(var(--session-rail-w, 0px) + var(--session-rail-end, 0px)) !important; width: auto !important; flex-shrink: 1 !important; }
+#cskin-settings .cskin-set-off { margin-top: 4px; border-top: 1px solid hsl(var(--text-500) / 0.14); border-radius: 0 0 6px 6px; padding-top: 7px; color: hsl(var(--text-300)); }
+#cskin-settings .cskin-set-off:hover { color: hsl(var(--text-100)); }
+
+/* 2026-11-12, Claude app 5.1231.2: fixes for this version.
+   - Group bars: the app's group button now sits inside an h3, which the skin hides with the rest of the row; the h3 is
+     brought back, invisible, over the whole bar, so the bar is the app's own handle again (grab cursor, dragging). */
+aside.dframe-sidebar .df-recents-anchor [class*="group/labelrow"] > h3:not(#cskin-none) { display: flex !important; position: absolute; inset: 0; margin: 0 !important; opacity: 0; }
+aside.dframe-sidebar .df-recents-anchor [class*="group/labelrow"] > h3 > button { width: 100% !important; height: 100% !important; margin: 0 !important; cursor: grab; }
+
+/* 2026-11-12: chats per group (gear menu). Chats past the limit are hidden (tag.js limitChats marks them); the skin's
+   "Show N more" row replaces the app's own Show more row until the group is opened. */
+aside.dframe-sidebar :is([data-cskin-over], [data-cskin-dup]) { display: none !important; }
+aside.dframe-sidebar [data-cskin-limited] [class*="group/section"] > :is(.contents, .hidden) > .df-drag-shiftable:not(:has(.dframe-fade-label)) { display: none !important; }
+aside.dframe-sidebar .cskin-more { display: block; width: 100%; height: var(--df-row-h, 20px); padding: 0 6px; border: 0; border-radius: 6px; background: none;
+  text-align: left; font: inherit; font-size: calc(var(--df-row-font, 10.5px) - 1px); color: hsl(var(--text-400)); cursor: pointer; }
+aside.dframe-sidebar .cskin-more:hover { background: hsl(var(--text-500) / 0.10); color: hsl(var(--text-100)); }
+#cskin-settings .cskin-set-num { cursor: default; }
+#cskin-settings .cskin-set-num:hover { background: none; }
+#cskin-settings .cskin-num-box { display: inline-flex; align-items: center; gap: 8px; }
+#cskin-settings .cskin-num { width: 42px; padding: 1px 4px; border: 1px solid hsl(var(--text-500) / 0.3); border-radius: 5px; background: hsl(var(--bg-100)); color: inherit; font: inherit; }
+#cskin-settings .cskin-num:disabled { opacity: .45; }
+#cskin-settings .cskin-unl { display: inline-flex; align-items: center; gap: 3px; font-size: 11px; color: hsl(var(--text-300)); cursor: pointer; }
+
+#cskin-settings .cskin-unit { font-size: 11px; color: hsl(var(--text-400)); margin-left: -5px; }

@@ -102,6 +102,8 @@ I wanted to use every bit of the screen and get more done. So I started tinkerin
 - **Smaller text and tighter rows**, so far more sessions fit on screen. The **A / A** buttons in the bottom bar change the text size (7 to 14).
 - **A narrower sidebar if you want one.** Drag the sidebar's right edge between 170 and 600 px. The app normally stops at 242 px. Double-click the edge to go back to the app's width.
 - **Project names become thin lines.** Hovering over a line turns it into a bar that you can drag to reorder projects.
+- **Group names above the bars.** Each project shows its name just above its line. Click the name or the line for the menu, where the pencil next to the name gives the group your own name (empty goes back to the app's), **New session here** starts a session in that project, and **Width: 1 column / 2 columns** lets a project run across the whole sidebar.
+- **Chats per group.** Each group shows its first 5 chats (in the order you see them) and a **Show N more** row for the rest. Change the number, or tick **Unlimited**, in the gear menu under the message box. The chat you have open always shows.
 - **Project colours.** Click a project's line to pick one of 20 colours. The whole project gets a soft box in that colour.
 - **Tags.** Give each project one tag, such as "Client" or "Personal", in one of 5 colours. Rename or recolour a tag once and it changes on every project.
 - **Collapse projects.** The arrow on the left of a project's line collapses it. A collapsed project shows the name of its latest session in small text, and opens again while you hover over it.
@@ -115,7 +117,7 @@ I wanted to use every bit of the screen and get more done. So I started tinkerin
 - **One button for everything.** On a session with Claude's orange "needs input" or red "failed" dot, the same **Mark as read** button also does Claude's own "Mark as completed", so one click clears the session.
 - **A New session ＋ button** next to search, since the sidebar's own New row is out of sight in this layout.
 - **No hover pop-ups** on session rows (the name tooltip and the large "Claude asked" card). Right-click still has every action.
-- **Text that follows the width.** The narrower you drag the sidebar or a side pane, the smaller its text gets, within the range you set with the A / A buttons.
+- **Text that follows the width.** The narrower you drag the sidebar or a side pane, the smaller its text gets, within the range you set with the A / A buttons. For a fixed sidebar size instead, untick **Auto** next to **Sidebar text size** in the gear menu and type a size (7 to 18 px).
 - **Nested sessions as a small tree.** A session started from another one sits under it, moved in only a few pixels, with a thin grey line and a rounded branch to each one. The colour menu's **Order** list shows them under their parent, and they move up and down among themselves.
 - **Every status dot in the same place.** The app's own dots and the skin's unread and running dots all line up at the right of the row, and names run right up to the dot with only a short fade when they are cut off.
 - **Long names roll.** Rest the pointer on a session whose name is cut off and, after a moment, the name slides along so you can read the end of it. Moving away slides it back.
@@ -126,10 +128,9 @@ I wanted to use every bit of the screen and get more done. So I started tinkerin
 ### Chat
 
 - **A wider chat.** The empty space on each side of the messages and the message box is cut in half.
+- **Wide mode.** The ↔ button at the left end of the row under the message box (the row with Claude's mode, usage and model) lets the messages and the message box fill the whole chat panel, 2rem in from each side. Click it again for the normal width. Your choice is remembered.
 - **Replies use the full width.** Claude normally stops every reply up to 56px short of the right edge. The skin removes that margin, so replies line up with the message box.
 - **The message box grows to 8 lines at most,** then scrolls, so it never covers the conversation.
-- **The Terminal, Changes and Browser buttons** move from the top bar into the ⋮ menu, with their shortcuts shown.
-- **A shorter top bar**, and a smaller session title in it.
 - **The buttons under each message** (copy, branch, pin, read aloud and the time) always show, and they are smaller. Claude normally only builds them the first time your mouse passes over a message, so the skin does that pass for you.
 - **Smaller tool lines** ("Ran 4 commands") and a smaller working status line, with less empty space around them.
 - **Escape no longer stops a reply by accident.** In Claude, pressing Escape while a reply is running stops it, even when you only meant to close Cmd+F search. The skin ignores a single Escape while a reply runs. Menus and dialogs still close with Escape, and pressing Escape twice quickly still stops the reply when you mean it.
@@ -176,7 +177,8 @@ To find what to change, open the console's **Elements** tab and point at any par
 
 ## Remove it or start over
 
-- **Remove the skin:** quit and reopen Claude (and turn off any automatic apply).
+- **Turn the skin off without quitting:** click the gear at the left end of the row under the message box and choose **Turn off skin**. Apply it again to bring it back; your choices stay saved. The sidebar width you dragged stays, because the skin also saves it in Claude's own setting.
+- **Remove the skin for good:** quit and reopen Claude (and turn off any automatic apply).
 - **Reset all your choices:** paste `localStorage.removeItem('claudeSkin')` into the console, then reapply. To clear the skin's unread dots too, also paste `localStorage.removeItem('claudeSkinUnread')`.
 
 ## Good to know
